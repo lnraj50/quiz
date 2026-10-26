@@ -1,0 +1,121 @@
+Act as an expert full-stack developer and instructional designer. Build a complete, production-ready, self-contained standalone HTML file (with embedded CSS and JavaScript) for an interactive live workshop quiz application.
+
+Do not split the code into separate files or use external build steps (no npm, no Webpack). Everything must work when saved as a single .html file and opened directly in any modern browser.
+
+---
+
+### 1. Topic & Content Specifications
+- Topic: [INSERT TOPIC HERE — e.g., B2B Account & Person Lead Scoring / Prompt AI Engineering / Cloud Architecture]
+- Target Audience: [INSERT TARGET AUDIENCE — e.g., Beginners to Intermediates / Practitioners & RevOps]
+- Total Questions: [INSERT NUMBER — e.g., 30 or 40 questions]
+- Question Format: Multiple-choice (4 choices: A, B, C, D) with strictly one correct answer.
+- Pedagogical Curriculum Structure:
+  Organize questions across structured pedagogical categories (e.g., Foundations/Rules, Arithmetic/Logic, Scenarios, and Advanced Edge Cases). Include a dynamic category pill badge on each question.
+- Strict Choice Balance & QA:
+  - Correct answers must be strictly balanced across choices (e.g., in a 40-question quiz, exactly 10 A's, 10 B's, 10 C's, 10 D's; in a 30-question quiz, balanced ~7-8 each).
+  - All numerical calculations, rubric constraints, and edge case evaluations must be thoroughly verified for mathematical and logic consistency.
+- Key Insight & Pedagogical Requirements (Crucial):
+  For EVERY question, the explanation card must be comprehensive and educational, structured into three distinct sections:
+  1. Concept Breakdown: A thorough 2-3 sentence technical explanation of why the correct option works and why the common alternatives fail.
+  2. Use Case 1: A concrete, realistic enterprise or workplace scenario demonstrating how this is applied in practice (e.g., in customer support, marketing, coding, or analytics).
+  3. Use Case 2: A second distinct real-world scenario (or a contrasting "before vs. after" failure-mode example showing what goes wrong if this principle is ignored).
+
+---
+
+### 2. Architecture & Networking (Serverless Multi-User)
+- Implement real-time host-to-participant communication using PeerJS WebRTC (include CDN: https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js).
+- Host creates a room with a random 4-digit numeric code (prefixed to avoid PeerJS collisions, e.g., 'workshop-quiz-XXXX').
+- Participants join by providing their Name and the 4-digit Room Code (no password required).
+- The Host acts as the authoritative state coordinator:
+  - Broadcasts active question index, timer duration, live countdown state, answer reveal events, and leaderboard scores.
+  - Receives participant answer submissions live (+10 points per correct answer during active rounds).
+  - Explicit State QA Safeguard: Handle answer choices robustly using strict comparison (`userAnswer !== undefined && userAnswer !== null`) so Option A (index 0) is never treated as falsy or unselected.
+
+---
+
+### 3. Host Timer Controls (Configurable 10s – 60s)
+- Host-controllable countdown slider and quick presets bounded between a minimum of 10 seconds and maximum of 60 seconds (presets for 15s, 30s, 45s, 60s).
+- Controls available to the Host:
+  - "Start / Resume" button (toggles to "Pause" when active; syncs pause state across all screens).
+  - "Reset" button (resets current question timer back to configured duration).
+  - "Previous" (◀) and "Next" (▶) buttons to pace through questions.
+  - "Jump to Question" dropdown/stepper for fast workshop navigation.
+  - "Finish Workshop" (🏁) button to conclude and trigger the closing podium.
+- Dynamic visual feedback:
+  - Animated progress bar that scales to whatever duration the host sets.
+  - Color transitions: Normal accent -> Warning amber at 35% time remaining -> Danger red at 15% time remaining.
+- When time expires (or host triggers reveal):
+  - Answers lock automatically.
+  - The correct option highlights in green; participant's pick shows red if incorrect.
+  - The in-depth Key Insight card expands to display the concept breakdown and both practical use cases.
+
+---
+
+### 4. UI, Themes & Branding
+- Modern, clean, responsive UI optimized for laptops, tablets, and phones.
+- Default Theme: Start in **Light Mode by default** (`data-theme="light"` on `<html>`).
+- Theme Switcher: Include a 3-way toggle for Light, Medium (Slate), and Dark themes using CSS variables and `data-theme` attribute on `<html>`. Persist selection to `localStorage`.
+- Header:
+  - Display co-branding logos at the top on a clean contrast plate:
+    - Logo 1 URL: [INSERT LOGO 1 URL — e.g., https://marmatodigital.com/wp-content/uploads/2023/10/main-marmato.png]
+    - Logo 2 URL: [INSERT LOGO 2 URL — e.g., https://b3maconsulting.com/assets/b3-logo-main.jpg]
+  - Place theme toggle and online participant counter on the upper-right corner.
+- Footer:
+  - Persistent attribution across all screens:
+    "Author: [INSERT AUTHOR NAME], [INSERT ROLE/TITLE], [INSERT COMPANY]"
+    (e.g., "Author: L Nagarajan, Senior Consultant, Marmato Digital")
+
+---
+
+### 5. Participant Views & Engagement
+- Screen 1: Role Selection ("Participant Login" vs. "Host / Admin Login").
+- Screen 2: Participant Name & Room Code input.
+- Screen 3: Host Room Generation Screen (displays generated 4-digit code in large font with copyable invite link).
+- Screen 4: Active Quiz Interface:
+  - Question progress counter (e.g., "Question 4 of 40") and Category Badge.
+  - Large countdown display and animated progress bar.
+  - Clear question prompt text.
+  - Responsive 2x2 grid of interactive choice buttons (with hover and selected states).
+  - Rich Explanation Card with styled sub-headings for:
+    • 💡 Why It Works (Core Concept)
+    • 🏢 Real-World Use Case 1
+    • 🚀 Real-World Use Case 2 / Practical Scenario
+
+---
+
+### 6. Live Standings Matrix & Difficulty Radar (Crucial Workshop Feature)
+In addition to the standard podium leaderboard, provide an interactive, comprehensive Live Standings Matrix for the Host and participants:
+- Table Structure:
+  - Sticky Left Columns: Rank, Participant Name, Total Pts, Accuracy %.
+  - Scrollable Question Columns: One column per question (Q1, Q2, Q3, ... up to Q40).
+  - Cell Visuals: Distinct color-coded icons/badges indicating status:
+    * ✅ Correct (+10 pts)
+    * ❌ Incorrect (0 pts)
+    * ⏳ Answered, pending host reveal
+    * ⚪ Not answered / timed out
+- Difficulty & Toughness Footer Rows:
+  - "Toughness %": Calculation showing the percentage of incorrect or unanswered attempts.
+  - "Pass Rate %": Percentage of participants who answered correctly.
+  - "Responses": Total count of participants who submitted an answer for that question.
+- Host Focus Action:
+  - Include a "Focus Current Question" button that scrolls the matrix directly to the active question's column.
+- Difficulty Radar / Summary Card:
+  - Displays top 3 Toughest Questions (lowest pass rate) and top 3 Easiest Questions, allowing the instructor to quickly identify concepts needing live review.
+
+---
+
+### 7. Closing & Export Features
+- Screen 5: Workshop Closing Screen:
+  - Visual 1st, 2nd, and 3rd place podium displaying winners' names and points with celebration confetti/animation.
+  - Full Standings Matrix embedded on the closing screen for complete post-session review.
+- Export Feature:
+  - "Download Scores (CSV)" button available both on the live leaderboard and closing screen.
+  - Comprehensive CSV Export containing:
+    1. Overall Summary: Rank, Participant Name, Total Points, Accuracy %, Total Correct.
+    2. Per-Question Detail Columns: Individual outcomes for each question (e.g., Q1_Result, Q2_Result, ... Q40_Result as Correct/Incorrect/Unanswered).
+    3. Aggregate Question Statistics: Appended summary table at the bottom showing Question #, Category, Pass Rate %, and Toughness % for curriculum review.
+    4. Metadata: Date, Room Code, Author, and Company attribution.
+
+---
+
+Please generate the complete standalone HTML code with all questions, in-depth use case explanations, CSS styling, and JavaScript included in a single code block ready to copy and paste.
