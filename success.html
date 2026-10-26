@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarTech & Digital Agency AM AI Playbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Theme Design Tokens */
+    :root[data-theme="dark"] {
+      --bg-canvas: #020617;        /* slate-950 */
+      --bg-surface: #0f172a;       /* slate-900 */
+      --bg-surface-elevated: #1e293b; /* slate-800 */
+      --bg-code: #020617;          /* slate-950 */
+      --border-subtle: #1e293b;    /* slate-800 */
+      --border-strong: #334155;    /* slate-700 */
+      --text-main: #f8fafc;        /* slate-50 */
+      --text-muted: #94a3b8;       /* slate-400 */
+      --text-faint: #64748b;       /* slate-500 */
+      --accent: #6366f1;           /* indigo-500 */
+      --accent-hover: #4f46e5;     /* indigo-600 */
+      --code-text: #c7d2fe;        /* indigo-200 */
+    }
+
+    :root[data-theme="medium"] {
+      --bg-canvas: #1e293b;        /* slate-800 */
+      --bg-surface: #334155;       /* slate-700 */
+      --bg-surface-elevated: #475569; /* slate-600 */
+      --bg-code: #0f172a;          /* slate-900 */
+      --border-subtle: #475569;    /* slate-600 */
+      --border-strong: #64748b;    /* slate-500 */
+      --text-main: #ffffff;
+      --text-muted: #cbd5e1;       /* slate-300 */
+      --text-faint: #94a3b8;       /* slate-400 */
+      --accent: #818cf8;           /* indigo-400 */
+      --accent-hover: #6366f1;
+      --code-text: #e0e7ff;
+    }
+
+    :root[data-theme="light"] {
+      --bg-canvas: #f8fafc;        /* slate-50 */
+      --bg-surface: #ffffff;       /* white */
+      --bg-surface-elevated: #f1f5f9; /* slate-100 */
+      --bg-code: #0f172a;          /* high-contrast dark box for prompts */
+      --border-subtle: #e2e8f0;    /* slate-200 */
+      --border-strong: #cbd5e1;    /* slate-300 */
+      --text-main: #0f172a;        /* slate-900 */
+      --text-muted: #475569;       /* slate-600 */
+      --text-faint: #64748b;       /* slate-500 */
+      --accent: #4f46e5;           /* indigo-600 */
+      --accent-hover: #4338ca;     /* indigo-700 */
+      --code-text: #e0e7ff;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .theme-surface {
+      background-color: var(--bg-surface);
+      border-color: var(--border-subtle);
+    }
+    .theme-surface-elevated {
+      background-color: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+    .theme-code {
+      background-color: var(--bg-code);
+      color: var(--code-text);
+      border-color: var(--border-subtle);
+    }
+    .theme-border {
+      border-color: var(--border-subtle);
+    }
+    .theme-text-muted {
+      color: var(--text-muted);
+    }
+    .theme-text-faint {
+      color: var(--text-faint);
+    }
+
+    /* Accessibility focus ring */
+    *:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col">
+
+  <!-- Accessible Live Region for Screen Readers & Feedback -->
+  <div id="a11y-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Navigation / Header -->
+  <header class="theme-surface border-b sticky top-0 z-50 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
+          AI
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight">MarTech AM Enablement Suite</h1>
+          <p class="text-xs theme-text-muted">Digital Marketing • CRM • Automation • BI • AI Data</p>
+        </div>
+      </div>
+
+      <!-- Theme Switcher Controls -->
+      <div class="flex items-center space-x-3">
+        <fieldset class="flex items-center bg-black/10 dark:bg-white/5 p-1 rounded-lg border theme-border">
+          <legend class="sr-only">Select color theme</legend>
+          <button 
+            type="button" 
+            onclick="setTheme('light')" 
+            id="theme-btn-light" 
+            aria-pressed="false"
+            class="px-2.5 py-1 text-xs font-medium rounded-md transition hover:opacity-80 flex items-center gap-1.5"
+            title="Switch to light theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span>Light</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="setTheme('medium')" 
+            id="theme-btn-medium" 
+            aria-pressed="false"
+            class="px-2.5 py-1 text-xs font-medium rounded-md transition hover:opacity-80 flex items-center gap-1.5"
+            title="Switch to medium slate theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <span>Medium</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="setTheme('dark')" 
+            id="theme-btn-dark" 
+            aria-pressed="true"
+            class="px-2.5 py-1 text-xs font-medium rounded-md transition hover:opacity-80 flex items-center gap-1.5"
+            title="Switch to dark theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            <span>Dark</span>
+          </button>
+        </fieldset>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 flex-1">
+
+    <!-- Hero / Strategic Alignment Banner -->
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 border border-indigo-900/40 p-8 shadow-xl text-white">
+      <div class="relative z-10 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-200 text-xs font-semibold uppercase tracking-wider mb-4">
+          Framework Grounded in The Strategic CSM & Retainer Economics
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Supercharging Account Managers with Generative AI
+        </h2>
+        <p class="mt-3 text-slate-300 text-base leading-relaxed">
+          Transform your account managers and client leads from reactive reporting drones into strategic, proactive growth partners. Reclaim administrative time, defend retainer margins from scope creep, and synthesize business ROI.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 1: Three Core Strategic Objectives -->
+    <section class="space-y-4">
+      <div>
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <span class="flex h-6 w-6 rounded-full bg-indigo-600 text-white text-xs items-center justify-center font-bold">1</span>
+          Strategic Objectives for Account Managers
+        </h3>
+        <p class="text-sm theme-text-muted">Three operational benchmarks for adopting AI across accounts.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Goal 1 -->
+        <div class="theme-surface border rounded-xl p-6 hover:shadow-md transition">
+          <div class="h-10 w-10 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold mb-4">01</div>
+          <h4 class="text-base font-bold">From Reporting Drone to CMO Advisor</h4>
+          <p class="text-xs font-semibold text-indigo-500 mt-1">Time Reclamation & Strategy</p>
+          <p class="text-sm theme-text-muted mt-3 leading-relaxed">
+            Eliminate 6–10 hours/week spent manually pasting numbers from Meta, GA4, and Klaviyo. Use AI to convert tactical metrics into pipeline velocity and blended payback periods.
+          </p>
+        </div>
+
+        <!-- Goal 2 -->
+        <div class="theme-surface border rounded-xl p-6 hover:shadow-md transition">
+          <div class="h-10 w-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold mb-4">02</div>
+          <h4 class="text-base font-bold">Retainer Margin & SOW Protection</h4>
+          <p class="text-xs font-semibold text-emerald-500 mt-1">Scope Control & Add-ons</p>
+          <p class="text-sm theme-text-muted mt-3 leading-relaxed">
+            Catch out-of-scope requests (e.g., ad-hoc landing pages, extra dashboards, unbilled webhook fixes) before they erode gross margins. Use AI to generate polite change orders.
+          </p>
+        </div>
+
+        <!-- Goal 3 -->
+        <div class="theme-surface border rounded-xl p-6 hover:shadow-md transition">
+          <div class="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold mb-4">03</div>
+          <h4 class="text-base font-bold">Cross-Selling Stack Maturity</h4>
+          <p class="text-xs font-semibold text-amber-500 mt-1">Expansion & NRR</p>
+          <p class="text-sm theme-text-muted mt-3 leading-relaxed">
+            Spot cross-sell triggers across the MarTech stack. Identify when a Paid Media client suffers from broken CRM tracking or when an email client needs server-side tracking (CAPI) and CDP setups.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Accessible Tab Controls & Keyboard Navigation -->
+    <section class="space-y-6">
+      <div>
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <span class="flex h-6 w-6 rounded-full bg-indigo-600 text-white text-xs items-center justify-center font-bold">2</span>
+          Real-Life Use Cases & Production Prompts
+        </h3>
+        <p class="text-sm theme-text-muted">
+          Use your mouse or arrow keys (<kbd class="px-1.5 py-0.5 text-[10px] border theme-border rounded bg-black/5 dark:bg-white/5 font-mono">←</kbd> / <kbd class="px-1.5 py-0.5 text-[10px] border theme-border rounded bg-black/5 dark:bg-white/5 font-mono">→</kbd>) to cycle through use cases.
+        </p>
+      </div>
+
+      <!-- ARIA Tablist -->
+      <div 
+        role="tablist" 
+        aria-label="Account Manager AI Use Cases" 
+        class="flex flex-wrap gap-2 border-b theme-border pb-3"
+        id="accessible-tabs">
+        <button 
+          role="tab" 
+          aria-selected="true" 
+          aria-controls="panel-case1" 
+          id="tab-case1" 
+          tabindex="0"
+          class="tab-button px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+          <span>Case 1: C-Level Performance Synthesis</span>
+        </button>
+        <button 
+          role="tab" 
+          aria-selected="false" 
+          aria-controls="panel-case2" 
+          id="tab-case2" 
+          tabindex="-1"
+          class="tab-button px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+          <span>Case 2: Scope Creep & Retainer Defense</span>
+        </button>
+        <button 
+          role="tab" 
+          aria-selected="false" 
+          aria-controls="panel-case3" 
+          id="tab-case3" 
+          tabindex="-1"
+          class="tab-button px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+          <span>Case 3: CPA Spike & Churn De-escalation</span>
+        </button>
+        <button 
+          role="tab" 
+          aria-selected="false" 
+          aria-controls="panel-case4" 
+          id="tab-case4" 
+          tabindex="-1"
+          class="tab-button px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+          <span>Case 4: Cross-Selling Stack Audits</span>
+        </button>
+      </div>
+
+      <!-- Tab Panel 1 -->
+      <div 
+        role="tabpanel" 
+        id="panel-case1" 
+        aria-labelledby="tab-case1" 
+        tabindex="0" 
+        class="tab-panel space-y-6">
+        <div class="theme-surface border rounded-xl p-5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-500 mb-1">Scenario & Demonstration Script</h4>
+          <p class="text-sm theme-text-muted">
+            <strong>The Situation:</strong> The client CMO is tired of 40-slide decks full of clicks. They need a 1-page executive summary connecting ad spend, CRM automations, and server-side tracking to pipeline and revenue.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">System Prompt</span>
+                <button type="button" onclick="copyPrompt('sys1', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="sys1" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">You are a Senior MarTech Strategy Partner and Digital Marketing Client Lead.
+Your role is to translate granular marketing operations data (ad spend, CTR, conversion rates, CRM lifecycle stages, email automations, data pipeline syncs) into high-level business impact for CMOs, CROs, and CFOs.
+
+Guidelines:
+- Never report vanity metrics in isolation (e.g., CTR or Open Rate). Always tether them to commercial reality: Pipeline, CAC, ROAS, LTV, and Revenue.
+- Highlight marketing efficiency, automated hours saved, and data hygiene improvements.
+- Format for busy C-suite readers: concise, bulleted, actionable, and financially grounded.</pre>
+            </div>
+          </div>
+
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">User Prompt Template</span>
+                <button type="button" onclick="copyPrompt('user1', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="user1" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">Analyze this monthly performance data for our client [Client Name, e.g., Omnichannel eCommerce / B2B SaaS]:
+
+Client Baseline & Target:
+- Core Objective: [e.g., Lower blended CAC by 15% and increase qualified SQL-to-Deal conversion]
+- Retainer Services Provided: [e.g., Paid Media (Meta/Google), HubSpot CRM automation, Looker BI reporting]
+
+Raw Monthly Performance Numbers:
+- Total Ad Spend: [e.g., $65,000 across Meta & Google]
+- Blended ROAS / MER: [e.g., 3.4x, down from 3.8x last month]
+- Leads / MQLs generated: [e.g., 420 leads at $155 CPL]
+- CRM Lead Lifecycle (HubSpot): [e.g., 420 Leads -> 65 SQLs -> 18 Closed Won Deals ($180k Pipeline)]
+- Automation & Lifecycle (Email/SMS): [e.g., Abandoned cart/re-engagement automation drove 24% of total revenue]
+- Technical/BI Note: [e.g., GA4 and BigQuery export pipeline was updated to include server-side tracking, recovering 12% lost attribution data]
+
+Generate:
+1. Executive Summary (3 bullets for the CMO): What went well, what dipped, and why.
+2. The "Dollars & Cents" Impact: Translate the server-side tracking and CRM automations into tangible business value/revenue safeguarded.
+3. Root Cause & Next Month's Pivot: A non-defensive explanation of why blended ROAS dipped and the proactive corrective action we are implementing.
+4. Two Upsell/Expansion Seeds: Identify two logical MarTech roadmap recommendations (e.g., lead scoring model, CDP integration) for next quarter.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 2 -->
+      <div 
+        role="tabpanel" 
+        id="panel-case2" 
+        aria-labelledby="tab-case2" 
+        tabindex="0" 
+        class="tab-panel hidden space-y-6">
+        <div class="theme-surface border rounded-xl p-5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-500 mb-1">Scenario & Demonstration Script</h4>
+          <p class="text-sm theme-text-muted">
+            <strong>The Situation:</strong> Client emails requesting 3 new landing pages, custom GA4 conversion events, and TikTok ad setups by Thursday on an existing $10k/mo retainer.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">System Prompt</span>
+                <button type="button" onclick="copyPrompt('sys2', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="sys2" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">You are a Commercial Director at an elite Digital Marketing & MarTech Consultancy.
+You are an expert in retainer management, SOW scope protection, and converting client scope creep into billable project change orders or retainer upgrades.
+Tone: Warm, consultative, collaborative, yet firm on agency boundaries. Never sound bureaucratic or dismissive.</pre>
+            </div>
+          </div>
+
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">User Prompt Template</span>
+                <button type="button" onclick="copyPrompt('user2', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="user2" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">A client sent this request, which exceeds our contracted monthly retainer scope. Help me respond professionally and position a paid add-on.
+
+Client: [Client Name]
+Current Retainer ($12k/mo SOW): [Includes: Managing Meta/Google campaigns up to $50k spend, maintenance of current HubSpot workflows, 1 bi-weekly Looker report].
+Out-of-Scope Client Request:
+"[Paste email: 'Hey team, we're launching a flash promo next week. Can you guys build 3 new landing pages with Unbounce, hook up custom conversion events in GA4, and set up TikTok ad campaigns by Thursday?']"
+
+Internal Constraints:
+- Engineering & Design bandwidth is tight.
+- This represents roughly 25-30 hours of unscheduled work.
+
+Generate:
+1. Scope Analysis: A clear internal breakdown of what is in-scope vs. out-of-scope.
+2. Client Response Email:
+   - Validate their flash promo and express excitement.
+   - Clarify current bandwidth and what we CAN deliver within the existing retainer (e.g., repurpose 1 existing page).
+   - Offer a structured "Fast-Track SOW Add-on" ($3,500 one-off or +$2,500/mo retainer tier) to deliver the full scope without sacrificing their core campaign performance.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 3 -->
+      <div 
+        role="tabpanel" 
+        id="panel-case3" 
+        aria-labelledby="tab-case3" 
+        tabindex="0" 
+        class="tab-panel hidden space-y-6">
+        <div class="theme-surface border rounded-xl p-5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-1">Scenario & Demonstration Script</h4>
+          <p class="text-sm theme-text-muted">
+            <strong>The Situation:</strong> Meta CPA spiked 50% over the last 14 days due to creative fatigue and pixel disconnects. The client sends a panicked cancellation threat.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">System Prompt</span>
+                <button type="button" onclick="copyPrompt('sys3', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="sys3" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">You are a Principal Growth & MarTech Consultant specializing in crisis de-escalation, performance marketing troubleshooting, and client retention.
+You help Account Managers turn defensive calls into confident, diagnostic working sessions grounded in data engineering and marketing science.</pre>
+            </div>
+          </div>
+
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">User Prompt Template</span>
+                <button type="button" onclick="copyPrompt('user3', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="user3" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">Our eCommerce client is panicking and threatening to pause our $8,000/month retainer.
+
+The Situation:
+- What happened: [e.g., CPA on Meta rose from $32 to $58 over the last 14 days following an iOS update and creative fatigue. Lead flow dropped 30%.]
+- Client Message: "[Paste excerpt: 'Results have tanked over the last two weeks. If CPA doesn't get back under $35 by Friday, we are pausing the retainer and shopping around for a new agency.']"
+- Technical Reality: [e.g., We advised them 3 weeks ago that their top 3 creatives were fatigued and needed fresh video assets. Also, their Shopify-Klaviyo sync had an API token disconnect on their end for 48 hours.]
+
+Generate:
+1. De-escalation Email (to send within 30 minutes): A calm, authoritative response that schedules a working session, acknowledges the urgency, and shares our immediate triage steps without finger-pointing.
+2. 5-Point Diagnostic Agenda: What the AM should present on the triage call (including creative testing fatigue, audience overlap, and tracking pipeline health).
+3. 7-Day Performance Action Plan: A concrete, step-by-step sprint plan we commit to executing to stabilize CPA.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 4 -->
+      <div 
+        role="tabpanel" 
+        id="panel-case4" 
+        aria-labelledby="tab-case4" 
+        tabindex="0" 
+        class="tab-panel hidden space-y-6">
+        <div class="theme-surface border rounded-xl p-5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-purple-500 mb-1">Scenario & Demonstration Script</h4>
+          <p class="text-sm theme-text-muted">
+            <strong>The Situation:</strong> An advertising-only client is burning money because their CRM data isn't segmented and leads are un-nurtured. Pitch an AI & CRM data audit.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">System Prompt</span>
+                <button type="button" onclick="copyPrompt('sys4', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="sys4" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">You are a Solutions Architect and MarTech Account Director.
+You understand that ad spend without strong CRM lifecycle automation and data clean rooms is wasted capital.
+Your goal is to help AMs cross-sell CRM, BI, and Data Pipeline services to clients who currently only buy paid advertising.</pre>
+            </div>
+          </div>
+
+          <div class="theme-surface border rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider theme-text-muted">User Prompt Template</span>
+                <button type="button" onclick="copyPrompt('user4', this)" class="copy-btn text-xs px-2.5 py-1 rounded theme-surface-elevated border theme-border font-medium hover:opacity-80 transition">Copy</button>
+              </div>
+              <pre id="user4" class="theme-code border text-xs p-4 rounded-lg overflow-x-auto whitespace-pre-wrap leading-relaxed">I want to pitch a MarTech Stack & CRM Data Audit to an existing Paid Media client.
+
+Client Context:
+- Client: [e.g., Fast-growing D2C brand spending $100k/month on ads]
+- Current Services: [Paid Social & Search only]
+- Observed Problems: [They have 150k contacts in Klaviyo/HubSpot with no segmentation; high churn after first purchase; Looker dashboards don't match GA4; no first-party data capture strategy ahead of cookie deprecation.]
+- Target Pitch: [Paid MarTech Audit + $5,000/mo CRM/Data Automation retainer add-on]
+
+Generate:
+1. The "Hidden Leak" Discovery Narrative: 3 provocative, consultative questions the AM can ask the client in the next check-in that make them realize how much ad budget they are burning due to poor CRM retention.
+2. One-Page Proposal Email: Pitching a 2-week "First-Party Data & CRM Revenue Audit" as an essential step to lower their Paid Ad CAC.
+3. Objection Handling: What to say if they say "Our internal marketing coordinator handles our CRM."</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Guardrails -->
+    <section class="space-y-4">
+      <div>
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <span class="flex h-6 w-6 rounded-full bg-indigo-600 text-white text-xs items-center justify-center font-bold">3</span>
+          Agency & MarTech AI Guardrails
+        </h3>
+        <p class="text-sm theme-text-muted">Essential operational rules to protect agency liability and client trust.</p>
+      </div>
+
+      <div class="overflow-hidden border rounded-xl theme-surface">
+        <table class="min-w-full divide-y theme-border text-left text-sm">
+          <thead class="theme-surface-elevated theme-text-muted font-semibold text-xs uppercase tracking-wider">
+            <tr>
+              <th scope="col" class="px-6 py-3.5">Risk / Common Trap</th>
+              <th scope="col" class="px-6 py-3.5">The Professional MarTech Best Practice</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y theme-border text-xs sm:text-sm">
+            <tr>
+              <td class="px-6 py-4 font-semibold text-rose-500">Pasting Client PII into Public LLMs</td>
+              <td class="px-6 py-4 theme-text-muted">Strictly anonymize data: <em>"Client A generated 120 SQLs"</em> instead of pasting raw corporate directories, lead phone numbers, or email CSVs.</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 font-semibold text-rose-500">Vague "Algorithm Blame" During Dips</td>
+              <td class="px-6 py-4 theme-text-muted">Never let AI generate generic excuses. Feed the model exact metrics (frequency, CPM, page load latency) so the response is mathematically grounded.</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 font-semibold text-rose-500">Over-Promising Technical Timelines</td>
+              <td class="px-6 py-4 theme-text-muted">AI creates code snippets quickly, but CRM sandbox testing and webhook validation take human hours. Confirm internal bandwidth before sharing estimates.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 4: 4-Week Curriculums -->
+    <section class="space-y-6">
+      <div>
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <span class="flex h-6 w-6 rounded-full bg-indigo-600 text-white text-xs items-center justify-center font-bold">4</span>
+          Tailored 4-Week Enablement Plans
+        </h3>
+        <p class="text-sm theme-text-muted">Two customized training tracks based on account manager specialization.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Track A -->
+        <div class="theme-surface border rounded-2xl p-6">
+          <div class="flex items-center justify-between pb-4 border-b theme-border">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-500">Curriculum Profile A</span>
+              <h4 class="text-lg font-bold mt-0.5">Performance & Media AM Lead</h4>
+            </div>
+            <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 text-xs font-semibold">Paid Ads / SEO</span>
+          </div>
+          <div class="mt-6 space-y-4">
+            <div class="border-l-2 border-indigo-500 pl-4">
+              <span class="text-xs font-bold text-indigo-500 uppercase">Week 1: Multi-Channel Executive Synthesis</span>
+              <p class="text-xs theme-text-muted mt-1">Prompting AI to convert messy ad exports into a 3-bullet CMO executive summary.</p>
+            </div>
+            <div class="border-l-2 border-indigo-500 pl-4">
+              <span class="text-xs font-bold text-indigo-500 uppercase">Week 2: Creative Fatigue & Ad Hook Testing</span>
+              <p class="text-xs theme-text-muted mt-1">Analyzing winning linguistic angles to build actionable creative refresh briefs.</p>
+            </div>
+            <div class="border-l-2 border-indigo-500 pl-4">
+              <span class="text-xs font-bold text-indigo-500 uppercase">Week 3: CPA Spikes & Crisis De-escalation</span>
+              <p class="text-xs theme-text-muted mt-1">Roleplay: Turning volatile campaign drops into structured 7-day performance sprints.</p>
+            </div>
+            <div class="border-l-2 border-indigo-500 pl-4">
+              <span class="text-xs font-bold text-indigo-500 uppercase">Week 4: Retainer Add-ons & CRO Expansion</span>
+              <p class="text-xs theme-text-muted mt-1">Positioning landing page and CRM lead-nurture add-ons to improve ad conversion.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track B -->
+        <div class="theme-surface border rounded-2xl p-6">
+          <div class="flex items-center justify-between pb-4 border-b theme-border">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-500">Curriculum Profile B</span>
+              <h4 class="text-lg font-bold mt-0.5">MarTech & Lifecycle AM Lead</h4>
+            </div>
+            <span class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">CRM / BI / Data</span>
+          </div>
+          <div class="mt-6 space-y-4">
+            <div class="border-l-2 border-emerald-500 pl-4">
+              <span class="text-xs font-bold text-emerald-500 uppercase">Week 1: Translating Tech Debt to Business Impact</span>
+              <p class="text-xs theme-text-muted mt-1">Connecting webhook failures and CRM discrepancies to pipeline health for non-technical buyers.</p>
+            </div>
+            <div class="border-l-2 border-emerald-500 pl-4">
+              <span class="text-xs font-bold text-emerald-500 uppercase">Week 2: Scope Creep & Retainer Add-on Economics</span>
+              <p class="text-xs theme-text-muted mt-1">Using AI to analyze SOW boundaries and produce consultative change orders.</p>
+            </div>
+            <div class="border-l-2 border-emerald-500 pl-4">
+              <span class="text-xs font-bold text-emerald-500 uppercase">Week 3: Automated Lifecycle Architecture</span>
+              <p class="text-xs theme-text-muted mt-1">Mapping complex multi-touch customer nurture flows for HubSpot and Klaviyo.</p>
+            </div>
+            <div class="border-l-2 border-emerald-500 pl-4">
+              <span class="text-xs font-bold text-emerald-500 uppercase">Week 4: MarTech Maturity Roadmaps</span>
+              <p class="text-xs theme-text-muted mt-1">Conducting full stack audits to pitch long-term data engineering retainers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="theme-surface border-t py-6 text-center text-xs theme-text-faint">
+    Digital Marketing Agency & MarTech Account Management Enablement Framework • Standalone Accessible Single-File App
+  </footer>
+
+  <!-- Interactive JavaScript: Themes, ARIA Tabs & Fallback Clipboard -->
+  <script>
+    /* ==========================================================================
+       1. Three-Way Theme Switcher (Light / Medium / Dark)
+       ========================================================================== */
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try {
+        localStorage.setItem('am_playbook_theme', theme);
+      } catch (e) {
+        /* LocalStorage might be disabled in sandboxed contexts */
+      }
+
+      // Update ARIA pressed state and active button styling
+      ['light', 'medium', 'dark'].forEach(t => {
+        const btn = document.getElementById('theme-btn-' + t);
+        const isActive = t === theme;
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        if (isActive) {
+          btn.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition bg-indigo-600 text-white shadow-sm flex items-center gap-1.5';
+        } else {
+          btn.className = 'px-2.5 py-1 text-xs font-medium rounded-md transition hover:opacity-80 theme-text-muted flex items-center gap-1.5';
+        }
+      });
+
+      announceToScreenReader('Switched to ' + theme + ' theme');
+    }
+
+    // Initialize saved theme or default to dark
+    (function initTheme() {
+      let savedTheme = 'dark';
+      try {
+        savedTheme = localStorage.getItem('am_playbook_theme') || 'dark';
+      } catch (e) {}
+      setTheme(savedTheme);
+    })();
+
+    /* ==========================================================================
+       2. Accessible Tab Controls & Keyboard Navigation (WAI-ARIA)
+       ========================================================================== */
+    const tabList = document.getElementById('accessible-tabs');
+    const tabs = Array.from(tabList.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+    function selectTab(targetTab) {
+      tabs.forEach(tab => {
+        const isTarget = tab === targetTab;
+        tab.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+        tab.setAttribute('tabindex', isTarget ? '0' : '-1');
+
+        if (isTarget) {
+          tab.classList.remove('theme-surface', 'theme-text-muted');
+          tab.classList.add('bg-indigo-600', 'text-white');
+          tab.focus();
+        } else {
+          tab.classList.remove('bg-indigo-600', 'text-white');
+          tab.classList.add('theme-surface', 'theme-text-muted');
+        }
+      });
+
+      const targetPanelId = targetTab.getAttribute('aria-controls');
+      panels.forEach(panel => {
+        if (panel.id === targetPanelId) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+
+      announceToScreenReader(targetTab.innerText.trim() + ' selected');
+    }
+
+    // Initialize tab styling
+    tabs.forEach(tab => {
+      const isSelected = tab.getAttribute('aria-selected') === 'true';
+      if (isSelected) {
+        tab.classList.add('bg-indigo-600', 'text-white');
+      } else {
+        tab.classList.add('theme-surface', 'theme-text-muted');
+      }
+    });
+
+    // Click handler
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => selectTab(tab));
+    });
+
+    // Keyboard Navigation (Arrow Left, Arrow Right, Home, End)
+    tabList.addEventListener('keydown', (e) => {
+      const currentIndex = tabs.indexOf(document.activeElement);
+      if (currentIndex === -1) return;
+
+      let newIndex = null;
+      if (e.key === 'ArrowRight') {
+        newIndex = (currentIndex + 1) % tabs.length;
+      } else if (e.key === 'ArrowLeft') {
+        newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      } else if (e.key === 'Home') {
+        newIndex = 0;
+      } else if (e.key === 'End') {
+        newIndex = tabs.length - 1;
+      }
+
+      if (newIndex !== null) {
+        e.preventDefault();
+        selectTab(tabs[newIndex]);
+      }
+    });
+
+    /* ==========================================================================
+       3. Reliable Clipboard Copy with Legacy Fallback
+       ========================================================================== */
+    function copyPrompt(elementId, btn) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const textToCopy = el.innerText || el.textContent;
+
+      // Primary: Modern Async Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => handleCopySuccess(btn))
+          .catch(() => fallbackCopy(textToCopy, btn));
+      } else {
+        // Fallback for sandboxes, iframes, or non-secure contexts
+        fallbackCopy(textToCopy, btn);
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        // Prevent scrolling to bottom in mobile/desktop
+        textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.width = '2em';
+        textarea.style.height = '2em';
+        textarea.style.padding = '0';
+        textarea.style.border = 'none';
+        textarea.style.outline = 'none';
+        textarea.style.boxShadow = 'none';
+        textarea.style.background = 'transparent';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        if (successful) {
+          handleCopySuccess(btn);
+        } else {
+          handleCopyFailure(btn);
+        }
+      } catch (err) {
+        handleCopyFailure(btn);
+      }
+    }
+
+    function handleCopySuccess(btn) {
+      const originalText = btn.innerText;
+      btn.innerText = 'Copied!';
+      btn.classList.add('bg-emerald-600', 'text-white');
+      announceToScreenReader('Prompt copied to clipboard');
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.remove('bg-emerald-600', 'text-white');
+      }, 2000);
+    }
+
+    function handleCopyFailure(btn) {
+      btn.innerText = 'Press Ctrl+C';
+      setTimeout(() => {
+        btn.innerText = 'Copy';
+      }, 2500);
+    }
+
+    function announceToScreenReader(message) {
+      const announcer = document.getElementById('a11y-announcer');
+      if (announcer) {
+        announcer.textContent = message;
+      }
+    }
+  </script>
+</body>
+</html>
