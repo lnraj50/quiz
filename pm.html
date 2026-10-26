@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Workflow Hub - PM & Retainer Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .badge-strategic { background-color: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-tactical { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-non-prod { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- ================= AUTH SCREEN ================= -->
+  <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-xl mb-3">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900">Agency Workflow Hub</h1>
+        <p class="text-sm text-slate-500 mt-1">CRM & Marketing Automation Delivery</p>
+      </div>
+
+      <!-- Quick Role Pickers -->
+      <div class="mb-6">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Instant Demo Sign-In</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="quickLogin('admin')" class="p-2.5 text-xs font-medium rounded-lg border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition text-center">
+            <span class="block font-bold text-slate-800">Admin</span>
+            <span class="text-[10px] text-slate-400">Full Access</span>
+          </button>
+          <button onclick="quickLogin('am')" class="p-2.5 text-xs font-medium rounded-lg border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition text-center">
+            <span class="block font-bold text-slate-800">Account Mgr</span>
+            <span class="text-[10px] text-slate-400">Sarah Jenkins</span>
+          </button>
+          <button onclick="quickLogin('prod')" class="p-2.5 text-xs font-medium rounded-lg border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition text-center">
+            <span class="block font-bold text-slate-800">Production</span>
+            <span class="text-[10px] text-slate-400">Alex Rivera</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="relative flex py-2 items-center">
+        <div class="flex-grow border-t border-slate-200"></div>
+        <span class="flex-shrink mx-3 text-xs text-slate-400">or enter credentials</span>
+        <div class="flex-grow border-t border-slate-200"></div>
+      </div>
+
+      <form onsubmit="handleManualLogin(event)" class="space-y-4 mt-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Email</label>
+          <input type="email" id="loginEmail" required value="am@agency.com" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Password</label>
+          <input type="password" id="loginPassword" required value="am123" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP ================= -->
+  <div id="mainApp" class="hidden flex-1 flex flex-col">
+    <!-- Top Nav -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-2">
+            <div class="p-2 bg-indigo-600 text-white rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg">AgencyHub</span>
+          </div>
+
+          <nav class="hidden md:flex space-x-1">
+            <button onclick="switchTab('board')" id="nav-board" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50">Board</button>
+            <button onclick="switchTab('tickets')" id="nav-tickets" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50">Tickets List</button>
+            <button onclick="switchTab('clients')" id="nav-clients" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50">Clients & Retainers</button>
+            <button onclick="switchTab('reports')" id="nav-reports" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50">Reports</button>
+          </nav>
+        </div>
+
+        <!-- User profile & Logout -->
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <div id="userFullName" class="text-sm font-semibold text-slate-900">User Name</div>
+            <span id="userRoleBadge" class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider bg-indigo-100 text-indigo-700">Role</span>
+          </div>
+          <button onclick="logout()" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Sign Out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sub-Header / Alert Banner Container -->
+    <div id="alertsBannerContainer" class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-sm text-amber-800">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+      <!-- ================= 1. KANBAN BOARD VIEW ================= -->
+      <section id="view-board" class="tab-view">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Delivery Kanban Board</h2>
+            <p class="text-xs text-slate-500">Track and move tasks across execution stages.</p>
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="openNewTicketModal()" id="btnNewTicket" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm flex items-center space-x-1">
+              <span>+ Create Ticket</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Column To Do -->
+          <div class="bg-slate-100/80 rounded-xl p-3 border border-slate-200">
+            <div class="flex justify-between items-center mb-3 px-1">
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-600">To Do</span>
+              <span id="count-todo" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">0</span>
+            </div>
+            <div id="col-todo" class="space-y-3 min-h-[400px]"></div>
+          </div>
+
+          <!-- Column In Progress -->
+          <div class="bg-slate-100/80 rounded-xl p-3 border border-slate-200">
+            <div class="flex justify-between items-center mb-3 px-1">
+              <span class="font-bold text-xs uppercase tracking-wider text-indigo-700">In Progress</span>
+              <span id="count-in_progress" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">0</span>
+            </div>
+            <div id="col-in_progress" class="space-y-3 min-h-[400px]"></div>
+          </div>
+
+          <!-- Column Under Review -->
+          <div class="bg-slate-100/80 rounded-xl p-3 border border-slate-200">
+            <div class="flex justify-between items-center mb-3 px-1">
+              <span class="font-bold text-xs uppercase tracking-wider text-amber-700">Under Review</span>
+              <span id="count-review" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">0</span>
+            </div>
+            <div id="col-review" class="space-y-3 min-h-[400px]"></div>
+          </div>
+
+          <!-- Column Completed -->
+          <div class="bg-slate-100/80 rounded-xl p-3 border border-slate-200">
+            <div class="flex justify-between items-center mb-3 px-1">
+              <span class="font-bold text-xs uppercase tracking-wider text-emerald-700">Completed</span>
+              <span id="count-completed" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">0</span>
+            </div>
+            <div id="col-completed" class="space-y-3 min-h-[400px]"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. TICKETS LIST VIEW ================= -->
+      <section id="view-tickets" class="tab-view hidden">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-slate-200 flex flex-wrap gap-3 justify-between items-center bg-slate-50/50">
+            <h2 class="text-base font-bold text-slate-800">All Client Tickets</h2>
+            <div class="flex gap-2 text-xs">
+              <select id="filterClient" onchange="renderTicketsList()" class="px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+                <option value="ALL">All Clients</option>
+              </select>
+              <select id="filterCategory" onchange="renderTicketsList()" class="px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+                <option value="ALL">All Categories</option>
+                <option value="Strategic">Strategic</option>
+                <option value="Tactical">Tactical</option>
+                <option value="Non-production">Non-production</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-b border-slate-200">
+                  <th class="py-3 px-4">Code</th>
+                  <th class="py-3 px-4">Title & Brief</th>
+                  <th class="py-3 px-4">Client</th>
+                  <th class="py-3 px-4">Category</th>
+                  <th class="py-3 px-4">Billing</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Hours Logged</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ticketsTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. CLIENTS & RETAINERS VIEW ================= -->
+      <section id="view-clients" class="tab-view hidden">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-slate-900">Client Accounts & Retainer Caps</h2>
+          <p class="text-xs text-slate-500">Includes live 75% pacing warning and 100% cap-exceeded threshold calculations.</p>
+        </div>
+
+        <div id="clientsCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      </section>
+
+      <!-- ================= 4. REPORTS VIEW ================= -->
+      <section id="view-reports" class="tab-view hidden">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Agency Utilization & Hours Report</h2>
+            <p class="text-xs text-slate-500">Billable vs Non-billable, category breakdown, and monthly client totals.</p>
+          </div>
+          <button onclick="exportReportsCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm flex items-center space-x-1">
+            <span>Export to CSV</span>
+          </button>
+        </div>
+
+        <!-- Summary Stat KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-medium text-slate-400 uppercase">Total Hours Logged</div>
+            <div id="statTotalHours" class="text-2xl font-bold text-slate-800 mt-1">0.0 hrs</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-medium text-slate-400 uppercase">Billable Hours</div>
+            <div id="statBillableHours" class="text-2xl font-bold text-indigo-600 mt-1">0.0 hrs</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-medium text-slate-400 uppercase">Non-Billable Hours</div>
+            <div id="statNonBillableHours" class="text-2xl font-bold text-slate-500 mt-1">0.0 hrs</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-medium text-slate-400 uppercase">Agency Billable Ratio</div>
+            <div id="statBillableRatio" class="text-2xl font-bold text-emerald-600 mt-1">0%</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-800 mb-4">Billable vs. Non-Billable Distribution</h3>
+            <div class="h-64 flex items-center justify-center">
+              <canvas id="chartBillable"></canvas>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-800 mb-4">Hours by Project Category</h3>
+            <div class="h-64 flex items-center justify-center">
+              <canvas id="chartCategory"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= TIME LOGGING MODAL ================= -->
+  <div id="timeModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Log Hours on Ticket</h3>
+          <p id="modalTicketTitle" class="text-xs text-slate-500 truncate max-w-xs mt-0.5"></p>
+        </div>
+        <button onclick="closeTimeModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form onsubmit="submitTimeLog(event)" class="space-y-4">
+        <input type="hidden" id="timeTicketId">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Hours Utilized (e.g., 1.5, 2.0)</label>
+          <input type="number" step="0.25" min="0.25" id="logHoursInput" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Date of Work</label>
+          <input type="date" id="logDateInput" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Description / Notes</label>
+          <textarea id="logNotesInput" rows="2" placeholder="e.g., Coded responsive email template and tested SFMC rendering" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeTimeModal()" class="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg">Save Time Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= CREATE TICKET MODAL ================= -->
+  <div id="createTicketModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-slate-900">Create New Project Ticket</h3>
+        <button onclick="closeNewTicketModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form onsubmit="submitNewTicket(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Client</label>
+          <select id="newTicketClient" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Title</label>
+          <input type="text" id="newTicketTitle" placeholder="e.g., Abandoned Cart Journey Automation" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Project Brief / Description</label>
+          <textarea id="newTicketDesc" rows="3" placeholder="Provide detailed specs, assets, and triggers..." required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Category</label>
+            <select id="newTicketCategory" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="Tactical">Tactical</option>
+              <option value="Strategic">Strategic</option>
+              <option value="Non-production">Non-production</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Billing Type</label>
+            <select id="newTicketBillable" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="true">Billable</option>
+              <option value="false">Non-billable</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Assign Production Member</label>
+            <select id="newTicketAssignee" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="Alex Rivera">Alex Rivera (CRM Dev)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Est. Hours</label>
+            <input type="number" step="0.5" id="newTicketEstimate" value="6.0" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeNewTicketModal()" class="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg">Create Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // 1. Initial Sample Records
+    const DB = {
+      users: [
+        { id: 'u1', name: 'Admin User', email: 'admin@agency.com', role: 'admin' },
+        { id: 'u2', name: 'Sarah Jenkins', email: 'am@agency.com', role: 'account_manager' },
+        { id: 'u3', name: 'Alex Rivera', email: 'prod@agency.com', role: 'production' }
+      ],
+      clients: [
+        {
+          id: 'c1',
+          name: 'Nexus Retail',
+          stack: 'Salesforce Marketing Cloud (SFMC) & Braze',
+          amId: 'u2',
+          retainerCap: 40.0 // 32 hrs logged = 80% (triggers 75% warning!)
+        },
+        {
+          id: 'c2',
+          name: 'FinVantage Tech',
+          stack: 'HubSpot Marketing Hub & Klaviyo',
+          amId: 'u2',
+          retainerCap: 25.0 // 26.5 hrs logged = 106% (triggers 100% cap exceeded!)
+        }
+      ],
+      tickets: [
+        {
+          id: 't101',
+          code: 'NEX-101',
+          clientId: 'c1',
+          title: 'SFMC Dynamic Abandoned Cart Journey',
+          desc: 'Build AMPscript dynamic email modular blocks and Journey Builder event triggers.',
+          category: 'Tactical',
+          billable: true,
+          status: 'in_progress',
+          assignee: 'Alex Rivera',
+          am: 'Sarah Jenkins',
+          estimatedHours: 16.0
+        },
+        {
+          id: 't102',
+          code: 'NEX-102',
+          clientId: 'c1',
+          title: 'Q4 CRM Audience Segmentation Roadmap',
+          desc: 'Analyze VIP buyer cohorts, churn risk scorecards, and cross-channel sync rules.',
+          category: 'Strategic',
+          billable: true,
+          status: 'review',
+          assignee: 'Alex Rivera',
+          am: 'Sarah Jenkins',
+          estimatedHours: 8.0
+        },
+        {
+          id: 't201',
+          code: 'FIN-201',
+          clientId: 'c2',
+          title: 'HubSpot Lead Scoring & Lifecycle Pipeline Sync',
+          desc: 'Configure deal stage trigger logic and automated nurturing branch webhooks.',
+          category: 'Tactical',
+          billable: true,
+          status: 'completed',
+          assignee: 'Alex Rivera',
+          am: 'Sarah Jenkins',
+          estimatedHours: 14.0
+        },
+        {
+          id: 't202',
+          code: 'FIN-202',
+          clientId: 'c2',
+          title: 'Weekly Retainer Performance & Alignment Call',
+          desc: 'Bi-weekly stakeholder check-in, sprint review, and deliverable prioritization.',
+          category: 'Non-production',
+          billable: false,
+          status: 'completed',
+          assignee: 'Sarah Jenkins',
+          am: 'Sarah Jenkins',
+          estimatedHours: 2.0
+        }
+      ],
+      timeEntries: [
+        { id: 'l1', ticketId: 't101', userId: 'u3', date: '2026-10-20', hours: 14.0, notes: 'Engineered AMPscript logic for abandoned cart blocks' },
+        { id: 'l2', ticketId: 't101', userId: 'u3', date: '2026-10-21', hours: 10.0, notes: 'Journey builder trigger setup and rendering test' },
+        { id: 'l3', ticketId: 't102', userId: 'u2', date: '2026-10-22', hours: 8.0, notes: 'Drafted segment matrix and predictive criteria' },
+        { id: 'l4', ticketId: 't201', userId: 'u3', date: '2026-10-18', hours: 16.5, notes: 'Built custom HubSpot workflow formulas and API tests' },
+        { id: 'l5', ticketId: 't201', userId: 'u3', date: '2026-10-19', hours: 8.0, notes: 'QA testing lifecycle stage updates' },
+        { id: 'l6', ticketId: 't202', userId: 'u2', date: '2026-10-23', hours: 2.0, notes: 'Client roadmap alignment presentation' }
+      ]
+    };
+
+    let currentUser = null;
+    let chartBillableInstance = null;
+    let chartCategoryInstance = null;
+
+    // 2. Authentication Handling
+    function quickLogin(type) {
+      if (type === 'admin') currentUser = DB.users[0];
+      if (type === 'am') currentUser = DB.users[1];
+      if (type === 'prod') currentUser = DB.users[2];
+      postLoginInit();
+    }
+
+    function handleManualLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const user = DB.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (user) {
+        currentUser = user;
+        postLoginInit();
+      } else {
+        alert('Invalid email. Use admin@agency.com, am@agency.com, or prod@agency.com');
+      }
+    }
+
+    function postLoginInit() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      document.getElementById('userFullName').textContent = currentUser.name;
+      const roleBadge = document.getElementById('userRoleBadge');
+      roleBadge.textContent = currentUser.role.replace('_', ' ');
+
+      // Permissions: Production cannot create tickets
+      const btnNew = document.getElementById('btnNewTicket');
+      if (currentUser.role === 'production') {
+        btnNew.classList.add('hidden');
+      } else {
+        btnNew.classList.remove('hidden');
+      }
+
+      switchTab('board');
+      renderAll();
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    // 3. Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(el => {
+        el.classList.remove('text-indigo-600', 'bg-indigo-50');
+        el.classList.add('text-slate-600');
+      });
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('text-indigo-600', 'bg-indigo-50');
+        activeNav.classList.remove('text-slate-600');
+      }
+
+      if (tabId === 'reports') {
+        renderReports();
+      }
+    }
+
+    // 4. Retainer Burn Calculations
+    function getClientBurn(clientId) {
+      const client = DB.clients.find(c => c.id === clientId);
+      const clientTicketIds = DB.tickets.filter(t => t.clientId === clientId).map(t => t.id);
+      
+      const billableHours = DB.timeEntries
+        .filter(entry => {
+          const ticket = DB.tickets.find(t => t.id === entry.ticketId);
+          return clientTicketIds.includes(entry.ticketId) && ticket && ticket.billable;
+        })
+        .reduce((sum, e) => sum + e.hours, 0);
+
+      const burnPercent = client.retainerCap > 0 ? (billableHours / client.retainerCap) * 100 : 0;
+      
+      let state = 'healthy';
+      if (burnPercent >= 100) state = 'exceeded';
+      else if (burnPercent >= 75) state = 'warning';
+
+      return {
+        billableHours,
+        cap: client.retainerCap,
+        percent: Math.round(burnPercent),
+        state
+      };
+    }
+
+    function getTicketLoggedHours(ticketId) {
+      return DB.timeEntries
+        .filter(e => e.ticketId === ticketId)
+        .reduce((sum, e) => sum + e.hours, 0);
+    }
+
+    // 5. Render Core UI Components
+    function renderAll() {
+      renderAlertsBanner();
+      renderBoard();
+      renderTicketsList();
+      renderClientsView();
+      populateClientSelects();
+    }
+
+    function renderAlertsBanner() {
+      const container = document.getElementById('alertsBannerContainer');
+      const alerts = [];
+
+      DB.clients.forEach(c => {
+        const burn = getClientBurn(c.id);
+        if (burn.state === 'exceeded') {
+          alerts.push(`🚨 <strong>Cap Exceeded (100%+):</strong> <strong>${c.name}</strong> has logged ${burn.billableHours} hrs against its ${burn.cap} hr retainer (${burn.percent}%). Work is overflowing monthly budget.`);
+        } else if (burn.state === 'warning') {
+          alerts.push(`⚠️ <strong>Pacing Alert (75%+):</strong> <strong>${c.name}</strong> has reached ${burn.billableHours} hrs / ${burn.cap} hrs (${burn.percent}%).`);
+        }
+      });
+
+      if (alerts.length > 0) {
+        container.innerHTML = alerts.join('<div class="mt-1"></div>');
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function renderBoard() {
+      const columns = {
+        todo: document.getElementById('col-todo'),
+        in_progress: document.getElementById('col-in_progress'),
+        review: document.getElementById('col-review'),
+        completed: document.getElementById('col-completed')
+      };
+
+      Object.values(columns).forEach(col => col.innerHTML = '');
+      const counts = { todo: 0, in_progress: 0, review: 0, completed: 0 };
+
+      DB.tickets.forEach(ticket => {
+        counts[ticket.status]++;
+        const client = DB.clients.find(c => c.id === ticket.clientId);
+        const logged = getTicketLoggedHours(ticket.id);
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition space-y-2.5";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${ticket.code}</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${getCategoryBadge(ticket.category)}">${ticket.category}</span>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 leading-snug">${ticket.title}</h4>
+            <div class="text-[11px] text-slate-500 mt-0.5 font-medium">${client ? client.name : ''}</div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+            <span class="font-medium">${logged}h / ${ticket.estimatedHours}h</span>
+            <span class="${ticket.billable ? 'text-indigo-600 font-bold' : 'text-slate-400'}">${ticket.billable ? 'Billable' : 'Non-Billable'}</span>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[10px] text-slate-400">👤 ${ticket.assignee}</span>
+            <div class="space-x-1">
+              <button onclick="openTimeModal('${ticket.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded">Log Time</button>
+              ${renderMoveStatusButtons(ticket)}
+            </div>
+          </div>
+        `;
+        columns[ticket.status].appendChild(card);
+      });
+
+      document.getElementById('count-todo').textContent = counts.todo;
+      document.getElementById('count-in_progress').textContent = counts.in_progress;
+      document.getElementById('count-review').textContent = counts.review;
+      document.getElementById('count-completed').textContent = counts.completed;
+    }
+
+    function renderMoveStatusButtons(ticket) {
+      if (ticket.status === 'todo') {
+        return `<button onclick="updateTicketStatus('${ticket.id}', 'in_progress')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold rounded">▶ Start</button>`;
+      } else if (ticket.status === 'in_progress') {
+        return `<button onclick="updateTicketStatus('${ticket.id}', 'review')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-semibold rounded">Review</button>`;
+      } else if (ticket.status === 'review') {
+        return `<button onclick="updateTicketStatus('${ticket.id}', 'completed')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-semibold rounded">✓ Done</button>`;
+      }
+      return '';
+    }
+
+    function updateTicketStatus(ticketId, newStatus) {
+      const ticket = DB.tickets.find(t => t.id === ticketId);
+      if (ticket) {
+        ticket.status = newStatus;
+        renderAll();
+      }
+    }
+
+    function getCategoryBadge(cat) {
+      if (cat === 'Strategic') return 'badge-strategic';
+      if (cat === 'Tactical') return 'badge-tactical';
+      return 'badge-non-prod';
+    }
+
+    function renderTicketsList() {
+      const tbody = document.getElementById('ticketsTableBody');
+      const clientFilter = document.getElementById('filterClient').value;
+      const catFilter = document.getElementById('filterCategory').value;
+
+      let filtered = DB.tickets.filter(t => {
+        if (clientFilter !== 'ALL' && t.clientId !== clientFilter) return false;
+        if (catFilter !== 'ALL' && t.category !== catFilter) return false;
+        return true;
+      });
+
+      tbody.innerHTML = '';
+      filtered.forEach(t => {
+        const client = DB.clients.find(c => c.id === t.clientId);
+        const logged = getTicketLoggedHours(t.id);
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-xs font-bold text-slate-500">${t.code}</td>
+          <td class="py-3 px-4">
+            <div class="font-semibold text-slate-900">${t.title}</div>
+            <div class="text-xs text-slate-400 truncate max-w-sm">${t.desc}</div>
+          </td>
+          <td class="py-3 px-4 text-xs font-medium text-slate-700">${client ? client.name : ''}</td>
+          <td class="py-3 px-4"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${getCategoryBadge(t.category)}">${t.category}</span></td>
+          <td class="py-3 px-4 text-xs ${t.billable ? 'text-indigo-600 font-bold' : 'text-slate-400'}">${t.billable ? 'Billable' : 'Non-billable'}</td>
+          <td class="py-3 px-4"><span class="capitalize text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${t.status.replace('_', ' ')}</span></td>
+          <td class="py-3 px-4 text-xs font-medium text-slate-800">${logged}h / ${t.estimatedHours}h</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="openTimeModal('${t.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">Log Time</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderClientsView() {
+      const grid = document.getElementById('clientsCardsGrid');
+      grid.innerHTML = '';
+
+      DB.clients.forEach(client => {
+        const burn = getClientBurn(client.id);
+        const amUser = DB.users.find(u => u.id === client.amId);
+
+        let alertBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">Healthy (< 75%)</span>`;
+        let barColor = `bg-emerald-500`;
+
+        if (burn.state === 'exceeded') {
+          alertBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">100%+ Cap Exceeded</span>`;
+          barColor = `bg-rose-600`;
+        } else if (burn.state === 'warning') {
+          alertBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">75%+ Pacing Alert</span>`;
+          barColor = `bg-amber-500`;
+        }
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">${client.name}</h3>
+              <p class="text-xs text-slate-500 mt-0.5">${client.stack}</p>
+            </div>
+            ${alertBadge}
+          </div>
+
+          <div class="pt-2">
+            <div class="flex justify-between text-xs font-medium mb-1.5">
+              <span class="text-slate-600">Monthly Retainer Consumption:</span>
+              <span class="font-bold text-slate-900">${burn.billableHours} hrs / ${burn.cap} hrs (${burn.percent}%)</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+              <div class="${barColor} h-3 rounded-full transition-all duration-500" style="width: ${Math.min(burn.percent, 100)}%"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs">
+            <div>
+              <span class="text-slate-400 block">Lead Account Manager</span>
+              <span class="font-semibold text-slate-700">${amUser ? amUser.name : 'Unassigned'}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Active Tickets</span>
+              <span class="font-semibold text-slate-700">${DB.tickets.filter(t => t.clientId === client.id).length} Workflows</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function populateClientSelects() {
+      const selectFilter = document.getElementById('filterClient');
+      const selectNewTicket = document.getElementById('newTicketClient');
+
+      selectFilter.innerHTML = '<option value="ALL">All Clients</option>';
+      selectNewTicket.innerHTML = '';
+
+      DB.clients.forEach(c => {
+        selectFilter.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        selectNewTicket.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    // 6. Time Modal & Submit
+    function openTimeModal(ticketId) {
+      const ticket = DB.tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      document.getElementById('timeTicketId').value = ticket.id;
+      document.getElementById('modalTicketTitle').textContent = `${ticket.code}: ${ticket.title}`;
+      document.getElementById('logDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('logHoursInput').value = '1.0';
+      document.getElementById('logNotesInput').value = '';
+
+      document.getElementById('timeModal').classList.remove('hidden');
+    }
+
+    function closeTimeModal() {
+      document.getElementById('timeModal').classList.add('hidden');
+    }
+
+    function submitTimeLog(e) {
+      e.preventDefault();
+      const ticketId = document.getElementById('timeTicketId').value;
+      const hours = parseFloat(document.getElementById('logHoursInput').value);
+      const date = document.getElementById('logDateInput').value;
+      const notes = document.getElementById('logNotesInput').value;
+
+      DB.timeEntries.push({
+        id: 'l' + (DB.timeEntries.length + 1),
+        ticketId,
+        userId: currentUser.id,
+        date,
+        hours,
+        notes
+      });
+
+      closeTimeModal();
+      renderAll();
+    }
+
+    // 7. Ticket Creation Modal
+    function openNewTicketModal() {
+      document.getElementById('createTicketModal').classList.remove('hidden');
+    }
+
+    function closeNewTicketModal() {
+      document.getElementById('createTicketModal').classList.add('hidden');
+    }
+
+    function submitNewTicket(e) {
+      e.preventDefault();
+      const clientId = document.getElementById('newTicketClient').value;
+      const title = document.getElementById('newTicketTitle').value;
+      const desc = document.getElementById('newTicketDesc').value;
+      const category = document.getElementById('newTicketCategory').value;
+      const billable = document.getElementById('newTicketBillable').value === 'true';
+      const assignee = document.getElementById('newTicketAssignee').value;
+      const estimatedHours = parseFloat(document.getElementById('newTicketEstimate').value) || 0;
+
+      const codePrefix = clientId === 'c1' ? 'NEX' : 'FIN';
+      const code = `${codePrefix}-${100 + DB.tickets.length + 1}`;
+
+      DB.tickets.push({
+        id: 't' + (DB.tickets.length + 1),
+        code,
+        clientId,
+        title,
+        desc,
+        category,
+        billable,
+        status: 'todo',
+        assignee,
+        am: currentUser.name,
+        estimatedHours
+      });
+
+      closeNewTicketModal();
+      renderAll();
+    }
+
+    // 8. Reports & Chart.js Engine
+    function renderReports() {
+      let totalHours = 0;
+      let billableHours = 0;
+      let nonBillableHours = 0;
+
+      let catHours = { Strategic: 0, Tactical: 0, 'Non-production': 0 };
+
+      DB.timeEntries.forEach(entry => {
+        const ticket = DB.tickets.find(t => t.id === entry.ticketId);
+        totalHours += entry.hours;
+
+        if (ticket) {
+          if (ticket.billable) billableHours += entry.hours;
+          else nonBillableHours += entry.hours;
+
+          if (catHours[ticket.category] !== undefined) {
+            catHours[ticket.category] += entry.hours;
+          }
+        }
+      });
+
+      const billableRatio = totalHours > 0 ? Math.round((billableHours / totalHours) * 100) : 0;
+
+      document.getElementById('statTotalHours').textContent = `${totalHours.toFixed(1)} hrs`;
+      document.getElementById('statBillableHours').textContent = `${billableHours.toFixed(1)} hrs`;
+      document.getElementById('statNonBillableHours').textContent = `${nonBillableHours.toFixed(1)} hrs`;
+      document.getElementById('statBillableRatio').textContent = `${billableRatio}%`;
+
+      // Chart 1: Billable vs Non-Billable
+      if (chartBillableInstance) chartBillableInstance.destroy();
+      const ctxBillable = document.getElementById('chartBillable').getContext('2d');
+      chartBillableInstance = new Chart(ctxBillable, {
+        type: 'doughnut',
+        data: {
+          labels: ['Billable', 'Non-Billable'],
+          datasets: [{
+            data: [billableHours, nonBillableHours],
+            backgroundColor: ['#6366f1', '#cbd5e1']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      // Chart 2: Category Breakdown
+      if (chartCategoryInstance) chartCategoryInstance.destroy();
+      const ctxCat = document.getElementById('chartCategory').getContext('2d');
+      chartCategoryInstance = new Chart(ctxCat, {
+        type: 'bar',
+        data: {
+          labels: ['Strategic', 'Tactical', 'Non-production'],
+          datasets: [{
+            label: 'Hours Logged',
+            data: [catHours['Strategic'], catHours['Tactical'], catHours['Non-production']],
+            backgroundColor: ['#8b5cf6', '#38bdf8', '#94a3b8']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // 9. Export Reports to CSV
+    function exportReportsCSV() {
+      let csv = "Entry ID,Date,Client,Ticket Code,Title,Category,Billing Type,Staff Member,Hours,Notes\n";
+
+      DB.timeEntries.forEach(entry => {
+        const ticket = DB.tickets.find(t => t.id === entry.ticketId) || {};
+        const client = DB.clients.find(c => c.id === ticket.clientId) || {};
+        const user = DB.users.find(u => u.id === entry.userId) || {};
+
+        const cleanNotes = (entry.notes || '').replace(/"/g, '""');
+        csv += `"${entry.id}","${entry.date}","${client.name || ''}","${ticket.code || ''}","${ticket.title || ''}","${ticket.category || ''}","${ticket.billable ? 'Billable' : 'Non-billable'}","${user.name || ''}","${entry.hours}","${cleanNotes}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Agency_Utilization_Report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
