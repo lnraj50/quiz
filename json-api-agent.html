@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GTM Workflow Workshop Quiz</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+html[data-theme="light"]{--bg:#f5f7fb;--card:#fff;--ink:#192235;--muted:#65718a;--line:#e1e7f0;--accent:#4f46e5;--soft:#eef2ff;--good:#138a5b;--bad:#cf3e4d;--warn:#d58a09;--shadow:0 12px 35px #17233d12}
+html[data-theme="slate"]{color-scheme:dark;--bg:#263244;--card:#344258;--ink:#f2f5fa;--muted:#b7c3d5;--line:#4b5c75;--accent:#a5b4fc;--soft:#414d6c;--good:#67d5a5;--bad:#ff8c98;--warn:#f6c76d;--shadow:0 12px 35px #10192766}
+html[data-theme="dark"]{color-scheme:dark;--bg:#111827;--card:#1f2937;--ink:#f3f4f6;--muted:#9ca3af;--line:#374151;--accent:#a5b4fc;--soft:#303a58;--good:#4ade80;--bad:#fb7185;--warn:#fbbf24;--shadow:0 12px 35px #0005}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:11px;padding:11px 15px;background:var(--accent);color:#fff;font-weight:750}
+button:hover{filter:brightness(1.06)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.secondary{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.danger{background:var(--bad);color:white}
+.small{padding:8px 11px;font-size:.9rem}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.head{max-width:1200px;margin:auto;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brands,.tools{display:flex;align-items:center;gap:12px}
+.brands img{max-width:135px;height:40px;object-fit:contain;background:white;border-radius:7px;padding:4px}
+.brand{font-weight:850}
+.tools{gap:10px}
+.online{color:var(--muted);font-size:.9rem}
+.theme{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px}
+main{max-width:1200px;margin:25px auto;padding:0 20px 30px}
+.screen{display:none}
+.screen.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.narrow{max-width:760px;margin:35px auto}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:var(--accent);font-weight:850}
+h1,h2,h3{margin-top:0;letter-spacing:-.025em}
+.muted{color:var(--muted)}
+.role-grid,.choice-grid,.two-col{display:grid;gap:13px}
+.role-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
+.role-card{min-height:120px;text-align:left;padding:20px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.field{display:grid;gap:7px;margin:14px 0}
+.field input,.field select{padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.row,.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status{padding:10px 13px;background:var(--soft);border-radius:10px;color:var(--muted);margin:12px 0}
+.room-code{font-size:clamp(2.5rem,8vw,5rem);font-weight:950;letter-spacing:.15em;color:var(--accent);margin:12px 0}
+.invite{display:flex;gap:8px}
+.invite input{flex:1;min-width:0}
+.quiz-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}
+.quiz-card{padding:clamp(18px,3vw,30px)}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{border-radius:999px;padding:6px 11px;background:var(--soft);color:var(--accent);font-size:.8rem;font-weight:800}
+.timer{font-size:1.45rem;font-weight:900;font-variant-numeric:tabular-nums}
+.progress{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:13px 0 22px}
+.progress div{height:100%;width:100%;background:var(--accent);transition:width .4s linear,background .2s}
+.progress.warning div{background:var(--warn)}
+.progress.danger div{background:var(--bad)}
+.question{font-size:clamp(1.35rem,3vw,2rem);line-height:1.3;margin:12px 0 20px}
+.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choice{min-height:76px;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);display:flex;gap:11px;align-items:flex-start}
+.letter{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--soft);color:var(--accent);font-weight:900}
+.choice.selected{border:2px solid var(--accent);background:var(--soft)}
+.choice.correct{border:2px solid var(--good);background:color-mix(in srgb,var(--good) 13%,var(--card))}
+.choice.incorrect{border:2px solid var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--card))}
+.explanation{display:none;margin-top:18px;padding:17px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+.explanation.show{display:block}
+.explanation h3{font-size:1rem;margin:0 0 5px}
+.explanation p{margin:0 0 13px;line-height:1.55}
+.explanation p:last-child{margin-bottom:0}
+.side{display:grid;gap:13px;align-content:start}
+.control{padding:13px;border:1px solid var(--line);border-radius:13px;margin-top:10px}
+.control input[type=range]{width:100%;accent-color:var(--accent)}
+.matrix-card{margin-top:17px}
+.matrix-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:460px}
+table{border-collapse:separate;border-spacing:0;white-space:nowrap;min-width:100%;font-size:.86rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:center;background:var(--card)}
+th{position:sticky;top:0;z-index:2;background:var(--soft)}
+.sticky{position:sticky;left:0;z-index:1;text-align:left}
+th.sticky{z-index:3;background:var(--soft)}
+.good{color:var(--good)}
+.bad{color:var(--bad)}
+.two-col{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:15px}
+.inner{box-shadow:none!important}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;text-align:center;gap:10px;margin:20px 0}
+.place{padding:18px 10px;background:var(--soft);border:1px solid var(--line);border-radius:14px}
+.place:first-child{min-height:160px}
+.place:nth-child(2){min-height:135px}
+.place:nth-child(3){min-height:115px}
+.medal{font-size:1.9rem}
+.qa-summary{border:1px solid var(--line);border-radius:12px;padding:13px;margin:14px 0}
+.qa-summary.pass{border-color:var(--good)}
+.qa-summary.fail{border-color:var(--bad)}
+.qa-table{max-height:430px}
+.qa-fail{color:var(--bad);font-weight:750}
+.qa-pass{color:var(--good);font-weight:750}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--card);padding:11px 15px;border-radius:10px;display:none}
+.toast.show{display:block}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:.85rem}
+@media(max-width:900px){.quiz-layout{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.head{padding:9px 12px}.brands img{max-width:80px;height:32px}.brand{display:none}.online{font-size:.75rem}.theme{max-width:90px}main{padding:0 12px 22px;margin-top:14px}.card{padding:17px}.role-grid,.choice-grid,.two-col{grid-template-columns:1fr}.side{grid-template-columns:1fr}.invite{flex-direction:column}.podium{gap:5px}}
+</style>
+</head>
+<body>
+<header><div class="head">
+  <div class="brands">
+    <img src="https://marmatodigital.com/wp-content/uploads/2023/10/main-marmato.png" alt="Marmato Digital">
+    <img src="https://b3maconsulting.com/assets/b3-logo-main.jpg" alt="B3MA Consulting">
+    <span class="brand">GTM Workflow Workshop</span>
+  </div>
+  <div class="tools"><span class="online" id="onlineCount">0 online</span>
+    <select class="theme" id="themeSelect" aria-label="Color theme">
+      <option value="light">Light</option><option value="slate">Medium</option><option value="dark">Dark</option>
+    </select>
+  </div>
+</div></header>
+<main>
+<section class="screen active" id="roleScreen">
+  <div class="card narrow">
+    <div class="eyebrow">Interactive live workshop</div><h1>GTM Workflows, APIs &amp; Agents</h1>
+    <p class="muted">A practical quiz on Make.com, JSON, APIs, webhooks, and agent workflows.</p>
+    <div class="role-grid">
+      <button class="role-card" id="goParticipant"><strong>🙋 Participant Login</strong><br><span class="muted">Join with your name and room code.</span></button>
+      <button class="role-card" id="goHost"><strong>🎙️ Host / Admin Login</strong><br><span class="muted">Run preflight QA and host the workshop.</span></button>
+    </div>
+    <div class="status">25 questions · Four choices each · Preflight QA required for hosting</div>
+  </div>
+</section>
+
+<section class="screen" id="joinScreen">
+  <div class="card narrow"><div class="eyebrow">Participant login</div><h2>Join the workshop</h2>
+    <div class="field"><label for="participantName">Your name</label><input id="participantName" maxlength="50" placeholder="e.g. Alex Morgan"></div>
+    <div class="field"><label for="roomInput">4-digit room code</label><input id="roomInput" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+    <div class="row"><button id="joinRoom">Join room</button><button class="secondary" data-screen="roleScreen">Back</button></div>
+    <div class="status" id="joinStatus">Ask your host for the room code.</div>
+  </div>
+</section>
+
+<section class="screen" id="hostSetupScreen">
+  <div class="card narrow"><div class="eyebrow">Host preflight</div><h2>Question and explanation QA</h2>
+    <p class="muted">Checks each answer index against its declared correct choice and checks that the matching explanation anchor is present. Room creation stays locked until all checks pass.</p>
+    <div id="qaSummary" class="qa-summary" role="status"></div>
+    <div class="controls"><button class="secondary" id="runQA">Run QA again</button><button id="createRoom" disabled>Create workshop room</button><button class="secondary" data-screen="roleScreen">Back</button></div>
+    <details open style="margin-top:16px"><summary><strong>Question-by-question QA report</strong></summary><div id="qaReport" style="margin-top:12px"></div></details>
+    <div id="hostRoomPanel" hidden>
+      <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+      <div class="eyebrow">Room code</div><div class="room-code" id="roomCodeDisplay">----</div>
+      <div class="invite"><input id="inviteLink" readonly aria-label="Participant invite link"><button class="secondary" id="copyInvite">Copy invite</button></div>
+      <div class="status" id="hostStatus">Connecting…</div>
+      <button id="beginWorkshop">Open workshop controls</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="quizScreen">
+  <div class="quiz-layout">
+    <div class="card quiz-card">
+      <div class="quiz-meta"><span class="pill" id="categoryPill">Waiting</span><span class="muted" id="questionCount">Waiting for host…</span><span class="timer" id="timerDisplay">--</span></div>
+      <div class="progress" id="progressTrack"><div id="progressBar"></div></div>
+      <h2 class="question" id="questionText">The workshop will appear here when the host begins.</h2>
+      <div class="choice-grid" id="choiceGrid"></div>
+      <div class="status" id="quizStatus">Waiting for the host to start.</div>
+      <div class="explanation" id="explanation">
+        <h3>💡 Why It Works (Core Concept)</h3><p id="conceptText"></p>
+        <h3>🏢 Real-World Use Case 1</h3><p id="useCaseOne"></p>
+        <h3>🚀 Real-World Use Case 2 / Practical Scenario</h3><p id="useCaseTwo"></p>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="card" id="hostControls" hidden>
+        <div class="eyebrow">Host controls</div><h3>Workshop pacing</h3>
+        <div class="control"><label for="durationRange">Round duration: <span id="durationLabel">30</span> seconds</label>
+          <input id="durationRange" type="range" min="10" max="60" value="30">
+          <div class="row"><button class="secondary small preset" data-seconds="15">15s</button><button class="secondary small preset" data-seconds="30">30s</button><button class="secondary small preset" data-seconds="45">45s</button><button class="secondary small preset" data-seconds="60">60s</button></div>
+        </div>
+        <div class="controls"><button id="startPause">Start</button><button class="secondary" id="resetTimer">Reset</button><button class="secondary" id="previousQuestion">◀ Previous</button><button class="secondary" id="nextQuestion">Next ▶</button></div>
+        <div class="field"><label for="jumpQuestion">Jump to question</label><select id="jumpQuestion"></select></div>
+        <div class="controls"><button class="secondary" id="revealAnswer">Reveal answer</button><button class="danger" id="finishWorkshop">🏁 Finish Workshop</button></div>
+        <div class="status" id="hostLiveStatus">Room ready</div>
+      </div>
+      <div class="card"><div class="eyebrow">Live leaderboard</div><h3>Standings</h3><div id="leaderboard"><p class="muted">No participants yet.</p></div>
+        <button class="secondary small" id="downloadLive">Download Scores (CSV)</button>
+      </div>
+    </aside>
+  </div>
+  <section class="card matrix-card">
+    <div class="matrix-title"><div><div class="eyebrow">Workshop insight</div><h3>Live standings matrix</h3></div>
+      <div class="row"><button class="secondary small" id="focusQuestion">Focus Current Question</button><button class="secondary small" id="downloadMatrix">Download Scores (CSV)</button></div>
+    </div>
+    <div id="matrixMount"></div>
+    <div class="two-col">
+      <div class="card inner"><h3>🧭 Toughest questions</h3><div id="toughList" class="muted"></div></div>
+      <div class="card inner"><h3>✨ Easiest questions</h3><div id="easyList" class="muted"></div></div>
+    </div>
+  </section>
+</section>
+
+<section class="screen" id="closingScreen">
+  <div class="card"><div class="eyebrow">Workshop complete</div><h1>🏁 Great work!</h1>
+    <p class="muted">Final standings and question-by-question results.</p>
+    <div class="podium" id="podium"></div>
+    <div class="matrix-title"><h2>Full standings matrix</h2><button class="secondary" id="downloadClosing">Download Scores (CSV)</button></div>
+    <div id="closingMatrix"></div>
+    <div class="two-col">
+      <div class="card inner"><h3>🧭 Toughest questions</h3><div id="closingTough"></div></div>
+      <div class="card inner"><h3>✨ Easiest questions</h3><div id="closingEasy"></div></div>
+    </div>
+    <button class="secondary" id="backToQuiz" style="margin-top:16px">Return to live view</button>
+  </div>
+</section>
+</main>
+<footer>Author: L Nagarajan, Senior Consultant, Marmato Digital</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+
+/*
+  `c` is the fixed, zero-based correct answer index: 0=A, 1=B, 2=C, 3=D.
+  `expectedChoice` and `qaAnchor` are explicit authoring assertions used by
+  preflight. Choices are never shuffled or reordered at runtime.
+*/
+const QUESTIONS=[
+{category:"Foundations",q:"In a Make.com scenario, what does a module generally represent?",a:["A single step or operation in a workflow","A password vault for all connected services","A permanent copy of every scenario run","A visual theme for the scenario"],c:0,expectedChoice:"A single step or operation in a workflow",qaAnchor:"A module performs one operation",concept:"A module performs one operation, such as watching for a new record or creating a task. A scenario connects modules into a workflow; a module is not itself a credential store, run archive, or visual theme.",u1:"A marketing operations team uses a trigger module for a new form submission, then a CRM module to create a lead.",u2:"If a support team expects one module to handle an entire multi-system process, it may miss that each action needs its own configured step."},
+{category:"Foundations",q:"What is the main purpose of JSON in an API workflow?",a:["To encrypt all data in transit","To represent structured data as text using key-value pairs and arrays","To schedule requests at fixed intervals","To authenticate a user without credentials"],c:1,expectedChoice:"To represent structured data as text using key-value pairs and arrays",qaAnchor:"JSON is a text format for representing structured values",concept:"JSON is a text format for representing structured values such as objects, arrays, strings, numbers, and booleans. It does not encrypt data or provide authentication; those concerns require separate mechanisms.",u1:"A lead API response may represent a contact as an object with fields such as name, email, and company.",u2:"If a workflow treats a JSON array as one flat text field, it can fail to iterate over individual line items."},
+{category:"Foundations",q:"Which statement best describes an API endpoint?",a:["A type of database backup","A browser cookie containing a secret","A specific address where an API accepts a request for a resource or action","A guarantee that every request succeeds"],c:2,expectedChoice:"A specific address where an API accepts a request for a resource or action",qaAnchor:"An endpoint is a URL or route",concept:"An endpoint is a URL or route used to interact with an API resource or operation, typically with a method such as GET or POST. It is not a backup or credential, and a valid endpoint can still return errors due to permissions, input, or service health.",u1:"A reporting workflow calls a sales API endpoint to retrieve opportunities for a selected date range.",u2:"A team that changes an endpoint path without updating its scenario may get a 404 even though its API key is still valid."},
+{category:"Foundations",q:"What is a webhook?",a:["A password that rotates every hour","A file format for spreadsheet exports","A backup connection used when an API is down","An HTTP callback that sends data when an event occurs"],c:3,expectedChoice:"An HTTP callback that sends data when an event occurs",qaAnchor:"A webhook lets one service notify another by sending an HTTP request",concept:"A webhook lets one service notify another by sending an HTTP request when an event occurs, often avoiding repeated polling. It is not a password or backup; the receiving workflow still needs to validate and process the request.",u1:"When a prospect books a demo, the scheduling app can send a webhook to start a Make.com follow-up scenario.",u2:"Polling for every appointment every minute may waste operations and increase delay compared with an event-driven callback."},
+{category:"Arithmetic & Logic",q:"A workflow processes 12 records per bundle and receives 5 bundles. How many records are processed in total?",a:["60","17","7","120"],c:0,expectedChoice:"60",qaAnchor:"12 × 5 = 60",concept:"Multiply the number of records in each bundle by the number of bundles: 12 × 5 = 60. Adding, subtracting, or multiplying the wrong quantities would not represent the total number of records.",u1:"An analytics import receives five batches of twelve rows, so the operations team expects sixty rows before deduplication.",u2:"If a scenario counts bundles as records, a dashboard may report five processed items instead of the sixty contained records."},
+{category:"Arithmetic & Logic",q:"An API allows 100 requests per minute. A scenario sends 4 requests per record. What is the maximum whole number of records per minute without exceeding that limit?",a:["400","25","96","20"],c:1,expectedChoice:"25",qaAnchor:"100 ÷ 4 = 25",concept:"Each record consumes four requests, so 100 ÷ 4 = 25 records per minute. Multiplying the limit or subtracting four would not account for the per-record request cost.",u1:"A CRM sync caps a batch at twenty-five records per minute to stay within a documented request ceiling.",u2:"Sending twenty-six records would require 104 requests, so a burst could be throttled or rejected."},
+{category:"Arithmetic & Logic",q:"A Make.com filter allows a bundle only when status equals qualified AND consent equals true. Which bundle passes?",a:["status=qualified, consent=false","status=new, consent=true","status=qualified, consent=true","status=qualified, consent missing"],c:2,expectedChoice:"status=qualified, consent=true",qaAnchor:"only the qualified bundle with consent true passes",concept:"An AND condition requires both comparisons to be true, so only the qualified bundle with consent true passes. A missing value is not safely equivalent to true, and satisfying only one condition is insufficient.",u1:"A lead-routing workflow sends records to sales only when qualification is complete and outreach consent is recorded.",u2:"Using OR by mistake could pass unqualified records or records without consent into a downstream campaign."},
+{category:"Arithmetic & Logic",q:"A paginated API returns 50 records per page. There are 230 records. How many pages are needed to retrieve them all?",a:["4","5","230","6"],c:1,expectedChoice:"5",qaAnchor:"a fifth contains the remaining 30",concept:"Divide 230 by 50 and round up: four full pages contain 200 records, and a fifth contains the remaining 30. Four pages would leave records unread.",u1:"A data export loops through five pages, stopping when the API indicates there is no next page.",u2:"If a scenario stops after four pages, the last thirty contacts may never reach the reporting sheet."},
+{category:"Scenarios",q:"A webhook may deliver the same event more than once. What is the safest workflow pattern?",a:["Use an event ID or idempotency key to detect and ignore duplicates","Assume duplicates never happen","Delete all records from the destination before each event","Retry every duplicate indefinitely"],c:0,expectedChoice:"Use an event ID or idempotency key to detect and ignore duplicates",qaAnchor:"use a stable event identifier",concept:"Delivery retries can create duplicate events, so the receiver should use a stable event identifier and make processing idempotent where possible. Blind trust, destructive replacement, or endless retries can cause data loss or repeated side effects.",u1:"An order-fulfillment scenario records each provider event ID before creating a shipment, preventing duplicate shipments.",u2:"Without deduplication, a delayed retry of a payment notification could trigger a second confirmation email or downstream task."},
+{category:"Scenarios",q:"A POST request to create a contact returns HTTP 401. What should you investigate first?",a:["Whether the JSON uses alphabetical key order","Whether the response body is too short","Whether the authentication credential is missing, invalid, or expired","Whether the request used a GET method"],c:2,expectedChoice:"Whether the authentication credential is missing, invalid, or expired",qaAnchor:"HTTP 401 generally indicates missing or invalid authentication credentials",concept:"HTTP 401 generally indicates missing or invalid authentication credentials; HTTP 403 more often indicates an authenticated identity lacks permission. JSON key order and response length do not diagnose an authentication failure.",u1:"An integration owner checks whether an API token expired after a service account credential rotation.",u2:"Repeatedly retrying the same request after a 401 wastes operations unless the credential or authentication configuration is corrected."},
+{category:"Scenarios",q:"A date value arrives as 2026-10-26T12:30:00Z. What does the trailing Z indicate?",a:["The date is invalid","The time is expressed in UTC","The date has no time zone information","The event happens every 30 minutes"],c:1,expectedChoice:"The time is expressed in UTC",qaAnchor:"Z marks UTC time",concept:"In the ISO 8601 timestamp, Z marks UTC time. It does not mean the timezone is absent or that the timestamp repeats; convert it to the intended local zone before presenting it to users.",u1:"A global sales dashboard converts UTC webhook timestamps to each regional team's local time.",u2:"Dropping the Z during parsing can make a scheduler interpret UTC as local time and run at an unexpected hour."},
+{category:"Scenarios",q:"A Make.com workflow should create a task only when a deal's amount exceeds 10,000. Which filter is appropriate?",a:["amount contains \"10,000\"","amount is empty","amount is greater than 10000","amount is equal to 10000"],c:2,expectedChoice:"amount is greater than 10000",qaAnchor:"a strict greater-than comparison is appropriate",concept:"The requirement says exceeds, so a strict greater-than comparison is appropriate; a deal worth exactly 10,000 should not pass. Comparing a formatted text substring or an empty value does not reliably express the numeric rule.",u1:"A revenue operations scenario creates an escalation for opportunities above the agreed threshold.",u2:"Using greater-than-or-equal would include a deal worth exactly 10,000, changing the stated business rule."},
+{category:"Advanced Edge Cases",q:"Which HTTP method is conventionally used to retrieve a resource without changing it?",a:["GET","POST","PATCH","DELETE"],c:0,expectedChoice:"GET",qaAnchor:"GET is conventionally used to retrieve",concept:"GET is conventionally used to retrieve a representation of a resource and should not be used for a state-changing operation. POST, PATCH, and DELETE typically create, partially update, or remove resources.",u1:"A scenario uses GET to read a contact's details before deciding whether to update it.",u2:"Using GET to trigger a destructive operation can be unsafe because retrieval requests may be retried or cached unexpectedly."},
+{category:"Advanced Edge Cases",q:"An API responds with HTTP 429. What does this most commonly mean?",a:["The requested record was permanently deleted","The server rejected the JSON syntax","The caller exceeded a rate limit","The caller is not authenticated"],c:2,expectedChoice:"The caller exceeded a rate limit",qaAnchor:"HTTP 429 means the client has sent too many requests",concept:"HTTP 429 means the client has sent too many requests in a given period; the response may include retry guidance such as Retry-After. It does not by itself indicate invalid JSON or an authentication failure.",u1:"A scenario pauses and retries after the API's stated cooldown rather than immediately sending more traffic.",u2:"A tight retry loop after 429 can intensify throttling and delay every later bundle."},
+{category:"Advanced Edge Cases",q:"A response contains {\"items\":[{\"id\":1},{\"id\":2}]}. What should a workflow do to process each item individually?",a:["Treat the whole response as one number","Replace the array with an empty object","Iterate over or map the items array","Send the raw response to a text field only"],c:2,expectedChoice:"Iterate over or map the items array",qaAnchor:"iterate over its elements",concept:"The items value is an array, so iterate over its elements or map them into the desired downstream structure. Treating it as a scalar or discarding it prevents per-item processing.",u1:"A catalog sync iterates through each returned product and upserts it into the store.",u2:"Sending the entire array into one text cell makes individual products difficult to validate, route, and retry."},
+{category:"Advanced Edge Cases",q:"A service returns HTTP 500. Which response is generally the best first step for a transient failure?",a:["Immediately repeat the same request without limit","Retry with bounded backoff and inspect the error context","Change the user's password","Delete the destination record"],c:1,expectedChoice:"Retry with bounded backoff and inspect the error context",qaAnchor:"bounded retries with exponential backoff",concept:"A 500 status indicates a server-side failure that may be transient; bounded retries with exponential backoff and logging can help while preventing retry storms. The status alone does not justify changing credentials or deleting data.",u1:"A reporting job retries a failed API request with increasing delays and alerts the owner after its retry budget is exhausted.",u2:"An unbounded immediate retry can overload the service and consume the scenario's operation quota."},
+{category:"Foundations",q:"What is an API key primarily used for?",a:["To identify or authenticate a client to an API, subject to the provider's design","To compress request payloads","To guarantee all data is encrypted end to end","To convert XML into JSON"],c:0,expectedChoice:"To identify or authenticate a client to an API, subject to the provider's design",qaAnchor:"identify or authenticate a client",concept:"An API key is a credential used by a provider to identify or authenticate a client and may also support access control or usage metering. It does not compress data or automatically encrypt a connection; use HTTPS and follow the provider's security guidance.",u1:"A team stores a provider API key in a secure connection setting rather than embedding it in a shared scenario description.",u2:"If a key is pasted into a public repository, an unauthorized party may use it even though requests still use HTTPS."},
+{category:"Foundations",q:"What does a JSON object use to associate values with names?",a:["Rows and columns only","Key-value pairs inside braces","A sequence of executable instructions","A binary-only encoding"],c:1,expectedChoice:"Key-value pairs inside braces",qaAnchor:"key-value pairs inside curly braces",concept:"A JSON object represents named properties as key-value pairs inside curly braces. Arrays use square brackets, and JSON data is not an executable instruction sequence or binary-only format.",u1:"A webhook payload object may contain keys such as email, source, and submitted_at.",u2:"A mapping that expects email but receives Email may fail because key names are case-sensitive in many JSON workflows."},
+{category:"Arithmetic & Logic",q:"A scenario makes 3 API calls per customer. If it handles 18 customers, how many calls does it make?",a:["21","54","15","36"],c:1,expectedChoice:"54",qaAnchor:"3 calls by 18 customers to get 54 calls",concept:"Multiply 3 calls by 18 customers to get 54 calls. Adding or subtracting the numbers does not model repeated per-customer work.",u1:"An operations manager estimates 54 requests for an 18-customer batch before scheduling it against a rate limit.",u2:"Underestimating this as 21 calls could cause a batch to exceed a provider's request allowance."},
+{category:"Arithmetic & Logic",q:"A webhook arrives at 09:00. A scenario adds a 20-minute delay, then another 15-minute delay. What is the resulting time?",a:["09:25","09:35","09:45","10:15"],c:1,expectedChoice:"09:35",qaAnchor:"the resulting time is 09:35",concept:"The total delay is 20 + 15 = 35 minutes, so the resulting time is 09:35. The other times either add too little or too much time.",u1:"A service team schedules a reminder 35 minutes after a signup event by combining two workflow waits.",u2:"If each delay is mistakenly treated as starting from a different clock reference, reminders may be sent too early or late."},
+{category:"Arithmetic & Logic",q:"A filter passes when score is at least 80. Which score is the lowest one that passes?",a:["79","80","81","0"],c:1,expectedChoice:"80",qaAnchor:"80 is the lowest passing score",concept:"At least 80 means greater than or equal to 80, so 80 is the lowest passing score. A strict greater-than rule would incorrectly reject exactly 80.",u1:"A quality review routes scores of 80 and above to the approved queue.",u2:"Using > instead of ≥ silently excludes the boundary value and can create disputes over eligibility."},
+{category:"Scenarios",q:"A CRM API returns a next_page URL. How should a workflow typically retrieve all results?",a:["Ignore it and assume the first page is complete","Call the same page repeatedly without checking","Follow the pagination link until no next page remains","Append an undocumented parameter to every URL"],c:2,expectedChoice:"Follow the pagination link until no next page remains",qaAnchor:"Follow the API's documented pagination mechanism",concept:"Follow the API's documented pagination mechanism, such as a next-page URL or cursor, until no further page is indicated. Guessing parameters or repeating the same page can produce incomplete or duplicate results.",u1:"A customer data sync follows the cursor returned by each response until the API signals completion.",u2:"If a workflow reads only the first page, records may be missing from a reconciliation report."},
+{category:"Scenarios",q:"An automation must not send a marketing email unless consent is explicitly recorded. What should it do when the consent field is missing?",a:["Assume consent is true","Send once and see whether anyone complains","Convert missing to true in the mapping","Stop or route the record for review until consent is confirmed"],c:3,expectedChoice:"Stop or route the record for review until consent is confirmed",qaAnchor:"stop or route the record for review",concept:"A missing consent value is unknown, not affirmative permission. Stop or route the record for review rather than inferring consent or sending first.",u1:"A campaign workflow filters for an explicitly true consent field before adding a person to a marketing audience.",u2:"Defaulting missing consent to true can create compliance risk and undermine customer trust."},
+{category:"Advanced Edge Cases",q:"A JSON field may be either a number or null. What is the safest way to calculate with it?",a:["Validate for null and numeric type, then apply an explicit fallback or error path","Assume null always means zero without checking the business rule","Concatenate it with a currency symbol first","Ignore validation because JSON guarantees every field is numeric"],c:0,expectedChoice:"Validate for null and numeric type, then apply an explicit fallback or error path",qaAnchor:"validate both presence and type",concept:"JSON permits null, so validate both presence and type, then apply a fallback only if the business meaning supports it. Blindly coercing null to zero can alter calculations; format values only after validation.",u1:"A revenue report routes missing amounts to data-quality review while calculating only validated numeric values.",u2:"Treating an unknown deal amount as zero could understate pipeline totals and distort forecasts."},
+{category:"Advanced Edge Cases",q:"An AI agent proposes a refund action based on a customer message. What is a prudent design for a high-impact action?",a:["Let the model execute every proposed refund without checks","Require validation against policy and, when appropriate, human approval before execution","Hide the action from audit logs","Retry the refund until the API succeeds"],c:1,expectedChoice:"Require validation against policy and, when appropriate, human approval before execution",qaAnchor:"human review where appropriate",concept:"Agents can interpret context and propose actions, but high-impact operations should be bounded by deterministic policy checks, authorization, and human review where appropriate. Unchecked execution, hidden logs, or repeated financial actions increase operational risk.",u1:"A support agent drafts a refund recommendation, while a policy check and authorized employee approve the final transaction.",u2:"If a prompt injection or mistaken interpretation triggers automatic refunds, the business may incur losses before detecting the issue."}
+];
+
+/* Deterministic preflight: catches invalid indices, choice/key drift, missing
+   explanation anchors, duplicate options, and missing teaching sections. */
+function runPreflightQA(){
+  const issues=[],rows=[];
+  QUESTIONS.forEach((q,i)=>{
+    const errors=[];
+    if(!Array.isArray(q.a)||q.a.length!==4)errors.push("Must have exactly four choices.");
+    if(!Number.isInteger(q.c)||q.c<0||q.c>3)errors.push("Correct index must be 0, 1, 2, or 3.");
+    const selected=Array.isArray(q.a)&&Number.isInteger(q.c)&&q.c>=0&&q.c<q.a.length?q.a[q.c]:"";
+    if(selected!==q.expectedChoice)errors.push(`Key points to "${selected}", expected "${q.expectedChoice}".`);
+    if(!q.concept||!q.concept.trim())errors.push("Why It Works explanation is missing.");
+    const normalizeQA=value=>String(value??"").toLowerCase().replace(/\s+/g," ").trim();
+    if(!normalizeQA(q.qaAnchor)||!normalizeQA(q.concept).includes(normalizeQA(q.qaAnchor)))errors.push(`Explanation is missing its QA anchor: "${q.qaAnchor||"(unset)"}".`);
+    if(!q.u1?.trim())errors.push("Use Case 1 is missing.");
+    if(!q.u2?.trim())errors.push("Use Case 2 is missing.");
+    if(Array.isArray(q.a)&&new Set(q.a).size!==q.a.length)errors.push("Duplicate answer choices found.");
+    if(errors.length)issues.push({number:i+1,errors});
+    rows.push({number:i+1,category:q.category,letter:["A","B","C","D"][q.c]||"?",choice:selected,errors});
+  });
+  return{passed:issues.length===0,total:QUESTIONS.length,issues,rows};
+}
+function renderQA(){
+  const result=runPreflightQA(),summary=$("qaSummary"),report=$("qaReport");
+  summary.className="qa-summary "+(result.passed?"pass":"fail");
+  summary.textContent=result.passed
+    ?`✅ QA passed: ${result.total}/${result.total} questions passed. Answer keys match their declared answers and every explanation contains its expected QA anchor.`
+    :`❌ QA failed: ${result.issues.length} question(s) need attention. Room creation is blocked.`;
+  $("createRoom").disabled=!result.passed;
+  const errorsByQ=new Map(result.issues.map(x=>[x.number,x.errors]));
+  report.innerHTML=`<div class="table-wrap qa-table"><table><thead><tr><th>Q</th><th>Category</th><th>Key</th><th>Selected choice</th><th>QA result / issues</th></tr></thead><tbody>${
+    result.rows.map(r=>{const e=errorsByQ.get(r.number)||[];return `<tr><td>${r.number}</td><td>${escapeHtml(r.category)}</td><td>${r.letter}</td><td style="text-align:left;white-space:normal;min-width:230px">${escapeHtml(r.choice)}</td><td style="text-align:left;white-space:normal;min-width:250px" class="${e.length?"qa-fail":"qa-pass"}">${e.length?e.map(escapeHtml).join("<br>"):"PASS"}</td></tr>`}).join("")
+  }</tbody></table></div>`;
+  return result;
+}
+
+const $=id=>document.getElementById(id),TOTAL=QUESTIONS.length;
+const app={name:"",room:"",peer:null,hostConn:null,isHost:false,current:0,duration:30,remaining:30,running:false,revealed:false,finished:false,participants:new Map(),connections:new Map(),submissions:{},timer:null,selected:null,lastState:null};
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function showScreen(id){document.querySelectorAll(".screen").forEach(x=>x.classList.toggle("active",x.id===id))}
+function toast(s){const t=$("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function applyTheme(v){document.documentElement.dataset.theme=v;localStorage.setItem("gtmQuizTheme",v);$("themeSelect").value=v}
+applyTheme(localStorage.getItem("gtmQuizTheme")||"light");
+$("themeSelect").onchange=e=>applyTheme(e.target.value);
+function sortedPlayers(){return[...app.participants.values()].sort((a,b)=>b.correct-a.correct||a.name.localeCompare(b.name))}
+function notifyCount(){$("onlineCount").textContent=(app.isHost?app.participants.size:(app.hostConn?1:0))+" online"}
+function statePayload(){return{type:"state",room:app.room,current:app.current,duration:app.duration,remaining:app.remaining,running:app.running,revealed:app.revealed,finished:app.finished,participants:[...app.participants.values()],submissions:app.submissions}}
+function broadcast(){if(!app.isHost)return;const s=statePayload();app.connections.forEach(c=>{try{if(c.open)c.send(s)}catch(e){console.error(e)}});renderAll()}
+function ensurePlayer(id,name){if(!app.participants.has(id))app.participants.set(id,{peerId:id,name:(name||"Participant").slice(0,50),answers:{},correct:0});return app.participants.get(id)}
+function hostId(room){return"workshop-quiz-"+room}
+function handleHostMessage(conn,d){
+  if(!d||typeof d!=="object")return;
+  if(d.type==="join"){ensurePlayer(conn.peer,d.name);app.connections.set(conn.peer,conn);conn.send(statePayload());broadcast();return}
+  if(d.type==="answer"){
+    const p=app.participants.get(conn.peer),n=d.index;
+    if(!p||!Number.isInteger(n)||n<0||n>3||d.question!==app.current||app.revealed||!app.running||app.remaining<=0)return;
+    if(p.answers[app.current]!==undefined&&p.answers[app.current]!==null)return;
+    p.answers[app.current]=n;
+    if(n===QUESTIONS[app.current].c)p.correct++;
+    app.submissions[app.current]=app.submissions[app.current]||{};
+    app.submissions[app.current][conn.peer]=n;
+    broadcast();
+  }
+}
+function participantState(d){
+  if(!d||d.type!=="state")return;
+  app.lastState=d;app.room=d.room||app.room;app.current=d.current;app.duration=d.duration;app.remaining=d.remaining;app.running=d.running;app.revealed=d.revealed;app.finished=d.finished;app.submissions=d.submissions||{};
+  app.participants=new Map((d.participants||[]).map(p=>[p.peerId,p]));
+  const me=app.participants.get(app.peer?.id);app.selected=me?.answers?.[app.current]??null;
+  renderAll();showScreen(d.finished?"closingScreen":"quizScreen");
+}
+$("goParticipant").onclick=()=>{showScreen("joinScreen");const room=new URLSearchParams(location.search).get("room");if(/^\d{4}$/.test(room||""))$("roomInput").value=room};
+$("goHost").onclick=()=>{renderQA();showScreen("hostSetupScreen")};
+document.querySelectorAll("[data-screen]").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+$("runQA").onclick=()=>{const r=renderQA();toast(r.passed?"All question checks passed.":"QA found mismatches; see report.")};
+
+$("createRoom").onclick=()=>{
+  const qa=renderQA();
+  if(!qa.passed){toast("Room creation blocked: fix the QA issues first.");return}
+  if(!window.Peer){$("hostStatus").textContent="PeerJS did not load. Check your internet connection and reload.";return}
+  app.isHost=true;app.room=String(1000+Math.floor(Math.random()*9000));app.peer=new Peer(hostId(app.room));
+  $("hostRoomPanel").hidden=false;$("roomCodeDisplay").textContent=app.room;
+  const u=new URL(location.href);u.searchParams.set("room",app.room);$("inviteLink").value=u.toString();$("hostStatus").textContent="Connecting to PeerJS…";
+  app.peer.on("open",()=>{$("hostStatus").textContent="Room is ready. Share the room code and invite link.";notifyCount()});
+  app.peer.on("connection",c=>{app.connections.set(c.peer,c);c.on("data",d=>handleHostMessage(c,d));c.on("close",()=>{app.connections.delete(c.peer);app.participants.delete(c.peer);broadcast()})});
+  app.peer.on("error",e=>{$("hostStatus").textContent="Room error: "+(e.type==="unavailable-id"?"Room ID collision. Reload and try again.":e.message||e.type)});
+};
+$("copyInvite").onclick=async()=>{try{await navigator.clipboard.writeText($("inviteLink").value)}catch(e){$("inviteLink").select();document.execCommand("copy")}toast("Invite link copied")};
+$("beginWorkshop").onclick=()=>{if(!app.peer?.open){toast("Wait for the room to connect");return}app.isHost=true;$("hostControls").hidden=false;fillJump();app.current=0;app.remaining=app.duration;app.running=false;app.revealed=false;showScreen("quizScreen");broadcast()};
+$("joinRoom").onclick=()=>{
+  const name=$("participantName").value.trim(),room=$("roomInput").value.trim();
+  if(!name){$("joinStatus").textContent="Enter your name to continue.";return}
+  if(!/^\d{4}$/.test(room)){$("joinStatus").textContent="Enter a valid 4-digit room code.";return}
+  if(!window.Peer){$("joinStatus").textContent="PeerJS did not load. Check your internet connection and reload.";return}
+  app.name=name;app.room=room;app.isHost=false;$("joinStatus").textContent="Connecting to host…";app.peer=new Peer();
+  app.peer.on("open",()=>{const c=app.peer.connect(hostId(room),{reliable:true});app.hostConn=c;c.on("open",()=>{c.send({type:"join",name});$("joinStatus").textContent="Connected. Waiting for the host.";notifyCount()});c.on("data",participantState);c.on("close",()=>{$("quizStatus").textContent="Connection closed. Ask the host to check the room.";app.hostConn=null;notifyCount()})});
+  app.peer.on("error",e=>{$("joinStatus").textContent="Could not join: "+(e.message||e.type)+". Check the room code and confirm the host is online."});
+};
+function fillJump(){const s=$("jumpQuestion");s.innerHTML="";QUESTIONS.forEach((q,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`Q${i+1} · ${q.category}`;s.appendChild(o)})}
+fillJump();
+$("durationRange").oninput=e=>{$("durationLabel").textContent=e.target.value;app.duration=Number(e.target.value);if(!app.running){app.remaining=app.duration;broadcast()}};
+document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{$("durationRange").value=b.dataset.seconds;$("durationRange").dispatchEvent(new Event("input"))});
+function startTimer(){if(app.finished)return;app.revealed=false;app.running=true;if(app.remaining<=0)app.remaining=app.duration;clearInterval(app.timer);app.timer=setInterval(()=>{app.remaining=Math.max(0,app.remaining-1);if(!app.remaining){app.running=false;app.revealed=true;clearInterval(app.timer)}broadcast()},1000);broadcast()}
+function pauseTimer(){app.running=false;clearInterval(app.timer);broadcast()}
+$("startPause").onclick=()=>app.running?pauseTimer():startTimer();
+$("resetTimer").onclick=()=>{app.running=false;clearInterval(app.timer);app.remaining=app.duration;app.revealed=false;for(const p of app.participants.values()){const v=p.answers[app.current];if(v!==undefined&&v!==null){if(v===QUESTIONS[app.current].c)p.correct=Math.max(0,p.correct-1);delete p.answers[app.current]}}delete app.submissions[app.current];broadcast()};
+function gotoQuestion(i){if(i<0||i>=TOTAL)return;app.running=false;clearInterval(app.timer);app.current=i;app.remaining=app.duration;app.revealed=false;broadcast()}
+$("previousQuestion").onclick=()=>gotoQuestion(app.current-1);
+$("nextQuestion").onclick=()=>gotoQuestion(app.current+1);
+$("jumpQuestion").onchange=e=>gotoQuestion(Number(e.target.value));
+$("revealAnswer").onclick=()=>{app.running=false;clearInterval(app.timer);app.revealed=true;broadcast()};
+$("finishWorkshop").onclick=()=>{app.running=false;app.finished=true;clearInterval(app.timer);broadcast();showScreen("closingScreen")};
+$("focusQuestion").onclick=()=>document.querySelector(`[data-qcol="${app.current}"]`)?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+$("backToQuiz").onclick=()=>showScreen("quizScreen");
+function submitAnswer(index,question){if(index===undefined||index===null)return;app.selected=index;if(app.hostConn?.open)app.hostConn.send({type:"answer",index,question});renderQuestion()}
+function renderQuestion(){
+  const d=app.lastState||statePayload(),i=Number.isInteger(d.current)?d.current:app.current,q=QUESTIONS[i]||QUESTIONS[0],rem=Math.max(0,Number(d.remaining??app.remaining)),dur=Math.max(1,Number(d.duration??app.duration)),revealed=!!d.revealed;
+  $("categoryPill").textContent=q.category;
+  $("questionCount").textContent=`Question ${i+1} of ${TOTAL}`;
+  $("timerDisplay").textContent=rem+"s";
+  $("progressBar").style.width=Math.min(100,rem/dur*100)+"%";
+  $("progressTrack").classList.toggle("warning",rem/dur<=.35&&rem/dur>.15);
+  $("progressTrack").classList.toggle("danger",rem/dur<=.15);
+  $("questionText").textContent=q.q;
+  const players=d.participants||[...app.participants.values()],me=players.find(p=>p.peerId===app.peer?.id),selected=app.isHost?null:(me?.answers?.[i]??app.selected);
+  const grid=$("choiceGrid");grid.innerHTML="";
+  q.a.forEach((text,n)=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.innerHTML=`<span class="letter">${"ABCD"[n]}</span><span>${escapeHtml(text)}</span>`;
+    if(selected===n)b.classList.add("selected");
+    if(revealed&&n===q.c)b.classList.add("correct");
+    if(revealed&&selected===n&&n!==q.c)b.classList.add("incorrect");
+    b.disabled=app.isHost||revealed||(selected!==undefined&&selected!==null)||!d.running;
+    b.onclick=()=>submitAnswer(n,i);
+    grid.appendChild(b);
+  });
+  $("explanation").classList.toggle("show",revealed);
+  if(revealed){$("conceptText").textContent=q.concept;$("useCaseOne").textContent=q.u1;$("useCaseTwo").textContent=q.u2}
+  if(app.isHost)$("quizStatus").textContent=revealed?"Answer revealed. Review the insight card.":d.running?"Question is live. Answers lock when time expires or you reveal.":"Timer paused. Start or resume when ready.";
+  else if(selected!==undefined&&selected!==null)$("quizStatus").textContent=revealed?(selected===q.c?"Correct! +10 points.":"Not quite. Review the explanation below."):"Answer submitted. Waiting for the reveal.";
+  else $("quizStatus").textContent=d.running?"Choose an answer before time runs out.":"Waiting for the host to start or resume.";
+  $("startPause").textContent=d.running?"Pause":"Start / Resume";
+  if(app.isHost){$("durationRange").value=d.duration;$("durationLabel").textContent=d.duration;$("jumpQuestion").value=i}
+}
+function renderLeaderboard(){
+  const ps=sortedPlayers();
+  $("leaderboard").innerHTML=ps.length
+    ?`<ol>${ps.slice(0,8).map(p=>`<li><strong>${escapeHtml(p.name)}</strong> · ${p.correct*10} pts · ${p.correct}/${TOTAL}</li>`).join("")}</ol><span class="muted">${ps.length} participant(s)</span>`
+    :'<p class="muted">No participants yet.</p>';
+}
+function qStats(i){
+  const ps=[...app.participants.values()],answered=ps.filter(p=>p.answers?.[i]!==undefined&&p.answers?.[i]!==null),correct=answered.filter(p=>p.answers[i]===QUESTIONS[i].c).length;
+  return{responses:answered.length,correct,pass:answered.length?Math.round(correct/answered.length*100):0,tough:ps.length?Math.round((ps.length-correct)/ps.length*100):0};
+}
+function renderDifficulty(toughId,easyId){
+  const xs=QUESTIONS.map((q,i)=>({i,...qStats(i)})).filter(x=>x.responses);
+  const list=a=>a.length
+    ?`<ol>${a.map(x=>`<li><strong>Q${x.i+1}</strong> · ${escapeHtml(QUESTIONS[x.i].category)} · ${x.pass}% pass (${x.responses} responses)</li>`).join("")}</ol>`
+    :'<span class="muted">Scores appear as participants answer.</span>';
+  $(toughId).innerHTML=list([...xs].sort((a,b)=>a.pass-b.pass).slice(0,3));
+  $(easyId).innerHTML=list([...xs].sort((a,b)=>b.pass-a.pass).slice(0,3));
+}
+function renderMatrix(id){
+  const mount=$(id),ps=sortedPlayers();
+  const header=QUESTIONS.map((q,i)=>`<th class="qcol" data-qcol="${i}" title="${escapeHtml(q.category)}">Q${i+1}</th>`).join("");
+  const body=ps.map((p,r)=>`<tr><td class="sticky">${r+1}</td><td class="sticky">${escapeHtml(p.name)}</td><td class="sticky">${p.correct*10}</td><td class="sticky">${Object.keys(p.answers||{}).length?Math.round(p.correct/Object.keys(p.answers).length*100):0}%</td>${QUESTIONS.map((q,i)=>{const v=p.answers?.[i];return`<td class="qcol ${v===undefined||v===null?"":v===q.c?"good":"bad"}" data-qcol="${i}">${v===undefined||v===null?"⚪":v===q.c?"✅":"❌"}</td>`}).join("")}</tr>`).join("");
+  const stats=QUESTIONS.map((q,i)=>qStats(i)),foot=[["Toughness %",s=>s.tough+"%"],["Pass Rate %",s=>s.pass+"%"],["Responses",s=>s.responses]];
+  mount.innerHTML=`<div class="table-wrap"><table><thead><tr><th class="sticky">Rank</th><th class="sticky">Participant</th><th class="sticky">Total Pts</th><th class="sticky">Accuracy %</th>${header}</tr></thead><tbody>${body||`<tr><td colspan="${TOTAL+4}" class="muted">Participant answers will appear here.</td></tr>`}</tbody><tfoot>${foot.map(([label,fn])=>`<tr><th class="sticky" colspan="4">${label}</th>${stats.map((s,i)=>`<td class="qcol" data-qcol="${i}">${fn(s)}</td>`).join("")}</tr>`).join("")}</tfoot></table></div>`;
+}
+function renderPodium(){
+  const p=sortedPlayers(),order=[p[1],p[0],p[2]],medals=["🥈","🥇","🥉"];
+  $("podium").innerHTML=order.map((x,i)=>`<div class="place"><div class="medal">${medals[i]}</div><strong>${x?escapeHtml(x.name):"—"}</strong><div>${x?x.correct*10+" points":"No participant"}</div></div>`).join("");
+}
+function renderAll(){
+  renderQuestion();renderLeaderboard();renderMatrix("matrixMount");renderMatrix("closingMatrix");
+  renderDifficulty("toughList","easyList");renderDifficulty("closingTough","closingEasy");
+  renderPodium();$("hostControls").hidden=!app.isHost;notifyCount();
+}
+function csvCell(v){return'"'+String(v??"").replace(/"/g,'""')+'"'}
+function downloadCSV(){
+  const rows=[["GTM Workflow Workshop Scores"],["Date",new Date().toISOString()],["Room Code",app.room||""],["Author","L Nagarajan"],["Company","Marmato Digital"],[],["Rank","Participant Name","Total Points","Accuracy %","Total Correct",...QUESTIONS.map((_,i)=>`Q${i+1}_Result`)]];
+  sortedPlayers().forEach((p,i)=>{
+    const n=Object.keys(p.answers||{}).length;
+    rows.push([i+1,p.name,p.correct*10,n?Math.round(p.correct/n*100):0,p.correct,...QUESTIONS.map((q,j)=>p.answers?.[j]===undefined||p.answers?.[j]===null?"Unanswered":p.answers[j]===q.c?"Correct":"Incorrect")]);
+  });
+  rows.push([],["Aggregate Question Statistics"],["Question #","Category","Pass Rate %","Toughness %","Responses"]);
+  QUESTIONS.forEach((q,i)=>{const s=qStats(i);rows.push([i+1,q.category,s.pass,s.tough,s.responses])});
+  const blob=new Blob(["\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=`gtm-workshop-${app.room||"scores"}-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href);
+}
+$("downloadLive").onclick=$("downloadMatrix").onclick=$("downloadClosing").onclick=downloadCSV;
+setInterval(()=>{if(app.isHost)$("hostLiveStatus").textContent=`Room ${app.room} · ${app.participants.size} participant(s) · Timer ${app.running?"running":"paused"}`},1000);
+renderQA();
+</script>
+</body>
+</html>
