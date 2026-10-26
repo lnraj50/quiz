@@ -116,6 +116,9 @@ In addition to the standard podium leaderboard, provide an interactive, comprehe
     3. Aggregate Question Statistics: Appended summary table at the bottom showing Question #, Category, Pass Rate %, and Toughness % for curriculum review.
     4. Metadata: Date, Room Code, Author, and Company attribution.
 
----
 
+### 8. Flight Pre check
+- Verify every answers against the Key Insight & Consulting Practice notes
+
+---
 Please generate the complete standalone HTML code with all questions, in-depth use case explanations, CSS styling, and JavaScript included in a single code block ready to copy and paste.
