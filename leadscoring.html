@@ -1955,7 +1955,7 @@
 
     // SCREEN ROUTING
     function showScreen(screenId) {
-      const screens = ['screen-role', 'screen-participant-join', 'screen-host-setup', 'screen-quiz', 'screen-closing'];
+      const screens = ['screen-role', 'screen-preflight', 'screen-participant-join', 'screen-host-setup', 'screen-quiz', 'screen-closing'];
       screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = (id === screenId) ? (id === 'screen-quiz' ? 'block' : 'flex') : 'none';
@@ -2096,13 +2096,12 @@
       currentRoomCode = randomCode;
       document.getElementById('host-room-code-display').innerText = currentRoomCode;
 
-      const peerId = getPeerRoomId(currentRoomCode);
-      peer = new Peer(peerId);
-
-      peer.on('open', (id) => {
-        console.log('Host peer registered:', id);
-        showScreen('screen-host-setup');
-      });
+      showScreen('screen-host-setup');
+      try {
+        const peerId = getPeerRoomId(currentRoomCode);
+        peer = new Peer(peerId);
+        peer.on('open', (id) => { console.log('Host peer registered:', id); });
+      } catch (err) { console.warn('Peer error:', err); }
 
       peer.on('connection', (conn) => {
         conn.on('open', () => {
