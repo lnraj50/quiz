@@ -117,8 +117,19 @@ In addition to the standard podium leaderboard, provide an interactive, comprehe
     4. Metadata: Date, Room Code, Author, and Company attribution.
 
 
-### 8. Flight Pre check
-- Verify every answers against the Key Insight & Consulting Practice notes
+### 8. Pre-Flight Content Validation & QA Gate (Zero-Defect Workshop Launch)
+To prevent runtime inconsistencies, mismatched answer keys, or incomplete explanations during live client delivery, the application must include an automated client-side pre-flight verification function (`runQuizPreflight()`):
+- Automated Verification Checklist:
+  1. Total Question Count: Verifies exactly 40 unique questions are present with continuous, non-duplicated IDs (1 to 40).
+  2. Four-Option Integrity: Asserts every question contains exactly 4 non-empty, trimmed option strings.
+  3. Key Range & Distribution Balance: Asserts every `correct` index is an integer in range [0..3] and that the distribution across the entire quiz is strictly balanced (exactly 10 A's, 10 B's, 10 C's, 10 D's).
+  4. Pedagogical Rationale Completeness: Asserts that every question contains non-empty strings for `explanation.concept`, `explanation.useCase1`, and `explanation.useCase2`.
+  5. Gold Key Verification: Compares each question's `correct` index against a hardcoded, reviewed canonical answer key array (`REVIEWED_KEYS`).
+- Host UI Enforcement:
+  - Add a dedicated `#preflightStatus` badge/banner on Screen 3 (Host Room Creation Screen).
+  - Automatically run `runQuizPreflight()` when the Host enters Screen 3. Display a green confirmation notice if all checks pass, or a styled warning banner detailing any offending questions.
+  - Hard Gate: If any pre-flight check fails, disable the "Start Workshop" button and display a toast alert blocking session launch until the question data is corrected.
+
 
 ---
 Please generate the complete standalone HTML code with all questions, in-depth use case explanations, CSS styling, and JavaScript included in a single code block ready to copy and paste.
