@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Washing Machine - Live Workshop Quiz</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root {
+  --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --text-muted: #64748b;
+  --primary: #2563eb; --primary-hover: #1d4ed8; --border: #e2e8f0;
+  --success: #16a34a; --danger: #dc2626; --warning: #d97706; --header-bg: #ffffff;
+}
+[data-theme="slate"] {
+  --bg: #1e293b; --card: #334155; --text: #f8fafc; --text-muted: #94a3b8;
+  --primary: #38bdf8; --primary-hover: #0284c7; --border: #475569;
+  --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --header-bg: #1e293b;
+}
+[data-theme="dark"] {
+  --bg: #090d16; --card: #131b2e; --text: #f1f5f9; --text-muted: #64748b;
+  --primary: #6366f1; --primary-hover: #4f46e5; --border: #1e293b;
+  --success: #10b981; --danger: #f43f5e; --warning: #fbbf24; --header-bg: #0f172a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+header { background: var(--header-bg); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.brand-plate { display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.95); padding: 6px 14px; border-radius: 8px; border: 1px solid #cbd5e1; }
+.brand-plate img { height: 28px; max-width: 140px; object-fit: contain; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.badge { background: var(--border); color: var(--text); padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+.cat-badge { background: #dbeafe; color: #1e40af; }
+[data-theme="dark"] .cat-badge { background: #1e3a8a; color: #93c5fd; }
+main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 24px 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.btn { background: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.15s; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn:hover { background: var(--primary-hover); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--border); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-danger { background: var(--danger); }
+.btn-success { background: var(--success); }
+.grid-2x2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 18px; }
+.opt-btn { background: var(--card); border: 2px solid var(--border); padding: 18px; border-radius: 10px; color: var(--text); text-align: left; font-size: 15px; cursor: pointer; transition: 0.15s; font-weight: 500; }
+.opt-btn:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-1px); }
+.opt-btn.selected { border-color: var(--primary); background: rgba(37,99,235,0.08); font-weight: 700; }
+.opt-btn.correct { border-color: var(--success) !important; background: rgba(22,163,74,0.12) !important; }
+.opt-btn.wrong { border-color: var(--danger) !important; background: rgba(220,38,38,0.12) !important; }
+.progress-track { background: var(--border); height: 10px; border-radius: 9999px; overflow: hidden; margin: 14px 0; }
+.progress-fill { height: 100%; width: 100%; transition: width 0.25s linear, background 0.3s; background: var(--primary); }
+.insight-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-top: 20px; display: none; }
+.insight-section { margin-bottom: 12px; }
+.insight-title { font-weight: 700; font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.matrix-container { overflow-x: auto; max-height: 400px; border: 1px solid var(--border); border-radius: 8px; margin-top: 14px; }
+table.matrix { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+table.matrix th, table.matrix td { padding: 8px 12px; border: 1px solid var(--border); white-space: nowrap; }
+table.matrix th { background: var(--bg); font-weight: 600; position: sticky; top: 0; z-index: 2; }
+.sticky-col-1 { position: sticky; left: 0; background: var(--card); z-index: 3; }
+.sticky-col-2 { position: sticky; left: 50px; background: var(--card); z-index: 3; }
+.radar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.host-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; padding: 12px; background: var(--bg); border-radius: 8px; }
+footer { border-top: 1px solid var(--border); padding: 16px; text-align: center; font-size: 12px; color: var(--text-muted); }
+.screen { display: none; }
+.screen.active { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand-plate">
+    <img src="https://marmatodigital.com/wp-content/uploads/2023/10/main-marmato.png" alt="Marmato Digital">
+    <img src="https://b3maconsulting.com/assets/b3-logo-main.jpg" alt="B3MA Consulting">
+  </div>
+  <div class="header-actions">
+    <span class="badge" id="onlineCounter">👥 Online: 0</span>
+    <select id="themeSelect" onchange="applyTheme(this.value)" class="btn btn-outline btn-sm">
+      <option value="light">☀️ Light</option>
+      <option value="slate">⛅ Slate</option>
+      <option value="dark">🌙 Dark</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <!-- Screen 1: Role Selection -->
+  <div id="screen1" class="screen active card" style="text-align:center; max-width:540px; margin:40px auto;">
+    <h2 style="margin-bottom:8px;">Contact Washing Machine Quiz</h2>
+    <p style="color:var(--text-muted); margin-bottom:24px;">Groq Module 33 Data Cleansing & Lead Normalization Engine</p>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button class="btn" onclick="goToScreen('screen2')">🙋 Join as Participant</button>
+      <button class="btn btn-outline" onclick="goToScreen('screen3')">👨‍🏫 Host / Instructor Admin</button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Participant Join -->
+  <div id="screen2" class="screen card" style="max-width:440px; margin:40px auto;">
+    <h3 style="margin-bottom:12px;">Join Workshop Session</h3>
+    <label style="display:block; font-size:13px; margin-bottom:4px;">Your Name</label>
+    <input type="text" id="pName" placeholder="e.g. Alex Morgan" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; margin-bottom:14px; background:var(--bg); color:var(--text);">
+    <label style="display:block; font-size:13px; margin-bottom:4px;">4-Digit Room Code</label>
+    <input type="text" id="pRoom" placeholder="e.g. 1024" maxlength="4" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; margin-bottom:18px; font-size:18px; letter-spacing:4px; text-align:center; background:var(--bg); color:var(--text);">
+    <button class="btn" style="width:100%;" onclick="joinRoom()">Connect & Join</button>
+    <button class="btn btn-outline btn-sm" style="width:100%; margin-top:10px;" onclick="goToScreen('screen1')">Back</button>
+  </div>
+
+  <!-- Screen 3: Host Room Setup -->
+  <div id="screen3" class="screen card" style="max-width:650px; margin:30px auto;">
+    <h3>Host Room Setup & Pre-Flight Check</h3>
+    <div id="preflightStatus" style="padding:14px; border-radius:8px; margin:16px 0; font-size:13px;">Checking pre-flight verification...</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
+      <div>
+        <div style="font-size:12px; color:var(--text-muted);">Assigned Room Code</div>
+        <div id="hostRoomCode" style="font-size:32px; font-weight:800; letter-spacing:4px; color:var(--primary);">----</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('hostRoomCode').innerText)">📋 Copy Code</button>
+    </div>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">Connected Participants: <strong id="hostParticipantCount">0</strong></p>
+    <button id="startWorkshopBtn" class="btn" style="width:100%;" onclick="startWorkshop()" disabled>Start Workshop Session</button>
+    <button class="btn btn-outline btn-sm" style="width:100%; margin-top:10px;" onclick="goToScreen('screen1')">Back to Menu</button>
+  </div>
+
+  <!-- Screen 4: Active Quiz Interface -->
+  <div id="screen4" class="screen">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span class="badge cat-badge" id="catBadge">Foundations</span>
+          <span style="font-size:13px; font-weight:600; margin-left:8px;" id="qCounter">Question 1 of 40</span>
+        </div>
+        <div style="font-size:18px; font-weight:700;" id="timerDisplay">30s</div>
+      </div>
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <h3 id="questionPrompt" style="margin:16px 0; line-height:1.4;">Question Prompt</h3>
+      <div class="grid-2x2" id="optionsGrid"></div>
+
+      <!-- Explanation Card -->
+      <div id="insightCard" class="insight-card">
+        <div class="insight-section">
+          <div class="insight-title">💡 Why It Works (Core Concept)</div>
+          <div id="insightConcept" style="font-size:14px; line-height:1.5;"></div>
+        </div>
+        <div class="insight-section">
+          <div class="insight-title">🏢 Enterprise Use Case 1</div>
+          <div id="insightUC1" style="font-size:14px; line-height:1.5;"></div>
+        </div>
+        <div class="insight-section" style="margin-bottom:0;">
+          <div class="insight-title">🚀 Real-World Scenario 2 (Failure Mode)</div>
+          <div id="insightUC2" style="font-size:14px; line-height:1.5;"></div>
+        </div>
+      </div>
+
+      <!-- Host Live Toolbar -->
+      <div id="hostToolbar" class="host-controls" style="display:none;">
+        <button class="btn btn-sm" id="timerToggleBtn" onclick="toggleTimer()">Pause</button>
+        <button class="btn btn-outline btn-sm" onclick="resetTimer()">Reset Timer</button>
+        <button class="btn btn-outline btn-sm" onclick="navQuestion(-1)">◀ Prev</button>
+        <button class="btn btn-outline btn-sm" onclick="navQuestion(1)">Next ▶</button>
+        <select id="jumpSelect" onchange="jumpToQ(parseInt(this.value))" class="btn btn-outline btn-sm" style="padding:4px 8px;"></select>
+        <button class="btn btn-success btn-sm" onclick="revealAnswer()">Reveal Note</button>
+        <button class="btn btn-danger btn-sm" onclick="finishWorkshop()">🏁 Finish</button>
+      </div>
+    </div>
+
+    <!-- Standings Matrix & Difficulty Radar -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <h4>📊 Live Standings Matrix</h4>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="focusCurrentCol()">🎯 Focus Current Q</button>
+          <button class="btn btn-outline btn-sm" onclick="exportScoresCSV()">📥 Download CSV</button>
+        </div>
+      </div>
+      <div class="matrix-container" id="matrixContainer">
+        <table class="matrix" id="matrixTable">
+          <thead><tr id="matrixHead"></tr></thead>
+          <tbody id="matrixBody"></tbody>
+          <tfoot id="matrixFoot"></tfoot>
+        </table>
+      </div>
+
+      <div class="radar-grid">
+        <div style="background:var(--bg); padding:14px; border-radius:8px;">
+          <h5 style="color:var(--danger); margin-bottom:8px;">🔥 Top 3 Toughest Questions</h5>
+          <div id="toughestList" style="font-size:12px;">Awaiting response data...</div>
+        </div>
+        <div style="background:var(--bg); padding:14px; border-radius:8px;">
+          <h5 style="color:var(--success); margin-bottom:8px;">🎯 Top 3 Easiest Questions</h5>
+          <div id="easiestList" style="font-size:12px;">Awaiting response data...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 5: Closing Podium -->
+  <div id="screen5" class="screen card" style="text-align:center;">
+    <h2>🏆 Workshop Concluded!</h2>
+    <p style="color:var(--text-muted); margin-bottom:20px;">Final Standings & Lead Cleansing Certification</p>
+    <div id="podiumDisplay" style="display:flex; justify-content:center; align-items:flex-end; gap:16px; margin:30px 0; min-height:160px;"></div>
+    <button class="btn" onclick="exportScoresCSV()">📥 Download Scores (CSV)</button>
+    <button class="btn btn-outline" style="margin-left:10px;" onclick="goToScreen('screen1')">Return to Home</button>
+  </div>
+</main>
+
+<footer>
+  Author: L Nagarajan, Senior Consultant, Marmato Digital | Co-branded: B3MA Consulting
+</footer>
+
+<script>
+const QUESTIONS = [
+  {"id":1,"cat":"Foundations / Rules","q":"Under Rule 1 (Names), how should the engine clean a raw lead with full_name 'Dr. ROBERT M. O'CONNOR'?","options":["first_name: 'Robert', last_name: 'O'Connor'","first_name: 'Dr. Robert', last_name: 'M. O'connor'","first_name: 'Robert M.', last_name: 'O'CONNOR'","first_name: 'Robert', last_name: 'M. O'Connor'"],"correct":0,"concept":"Rule 1 strictly strips salutations (Dr., Mr., Ms.) and enforces proper title casing, preserving Irish/Scottish prefixes (O'Connor).","useCase1":"Prevents automated emails greeting executive prospects with 'Hi Dr. ROBERT M.' instead of 'Hi Robert'.","useCase2":"Before: Salutations merged into first names broke CRM deduplication. After: Clean splitting consolidated duplicates."},
+  {"id":2,"cat":"Foundations / Rules","q":"Under Rule 2 (Company & Domain), what is the correct normalization for company 'Palo Alto Networks, Inc.' and website 'https://www.paloaltonetworks.com/products/prisma'?","options":["company_clean: 'Palo Alto Networks, Inc.', domain_clean: 'paloaltonetworks.com'","company_clean: 'Palo Alto Networks', domain_clean: 'paloaltonetworks.com'","company_clean: 'Palo Alto Networks', domain_clean: 'www.paloaltonetworks.com'","company_clean: 'Palo Alto Networks Inc', domain_clean: 'paloaltonetworks.com/products'"],"correct":1,"concept":"Rule 2 requires stripping legal entity suffixes (Inc, LLC, Ltd) and normalizing URLs to clean lowercase root domains without protocols or paths.","useCase1":"Lead-to-Account routing matches inbound leads to parent accounts via clean root domains.","useCase2":"Before: Deep URL subpaths created 200 ghost duplicate accounts. After: Root domain matching unified account views."},
+  {"id":3,"cat":"Foundations / Rules","q":"A lead provides company 'Acme Widgets' with missing website, and email 'sarah.connor@gmail.com'. What should domain_clean and is_business_email be?","options":["domain_clean: 'gmail.com', is_business_email: true","domain_clean: 'gmail.com', is_business_email: false","domain_clean: '' (or null), is_business_email: false","domain_clean: 'acmewidgets.com', is_business_email: false"],"correct":2,"concept":"Under Rules 2 & 3, domain fallback from email is only permitted for non-free domains. Gmail is consumer ISP; copying it to domain_clean is prohibited.","useCase1":"Enrichment engines like Clearbit or Apollo waste paid credits attempting firmographic lookup on consumer domains.","useCase2":"Before: A script populated 'gmail.com' as corporate domains, clustering 3,000 leads under 'Google'. After: Consumer domains blocked."},
+  {"id":4,"cat":"Foundations / Rules","q":"Under Rule 4 (Title Classification), which job level must be assigned to 'Head of Demand Generation'?","options":["Manager/Lead","VP","Individual Contributor","Director"],"correct":3,"concept":"Rule 4 explicitly defines 'Director' as comprising Director, Senior Director, and 'Head of [Department]'.","useCase1":"Executive round-robin SLA routing triggers director-tier rep notifications rather than manager pools.","useCase2":"Before: 'Head of' leads languished in junior SDR queues. After: Director classification routed leads to AEs within 15 minutes."},
+  {"id":5,"cat":"Foundations / Rules","q":"A contact title is 'Sr. Dir. of RevOps'. How should standardized_title and job_function be normalized?","options":["standardized_title: 'Senior Director of Revenue Operations', job_function: 'RevOps'","standardized_title: 'Sr. Dir. of RevOps', job_function: 'Sales'","standardized_title: 'Senior Director of RevOps', job_function: 'General Management'","standardized_title: 'Director of Operations', job_function: 'Marketing'"],"correct":0,"concept":"Rule 4 mandates expanding abbreviations ('Sr.' -> 'Senior', 'RevOps' -> 'Revenue Operations') and mapping to taxonomy 'RevOps'.","useCase1":"Dynamic email tokens like {{contact.standardized_title}} render professionally in outbound account-based campaigns.","useCase2":"Before: Raw abbreviations generated messy sales collateral. After: Expanded titles normalized persona analytics."},
+  {"id":6,"cat":"Foundations / Rules","q":"Under Rule 5 (Geography), a user enters country 'United Kingdom' and state 'Greater London'. What are the expected country_code and state_code?","options":["country_code: 'UK', state_code: 'LDN'","country_code: 'GB', state_code: null","country_code: 'GBR', state_code: 'GL'","country_code: 'United Kingdom', state_code: null"],"correct":1,"concept":"Rule 5 mandates 2-letter ISO country codes ('GB' for United Kingdom, not 'UK'). 2-letter state codes apply to federal entities (e.g. US/CA), else null.","useCase1":"International territory assignment in Marketo and Salesforce relies strictly on ISO-3166-1 alpha-2 codes.","useCase2":"Before: 'UK' bypassed regional EMEA sales queues, stranding qualified leads in holding queues. After: ISO 'GB' routed accurately."},
+  {"id":7,"cat":"Foundations / Rules","q":"Under Rule 4, which job_function should be assigned to 'Chief Information Security Officer' (CISO)?","options":["General Management","Legal & Compliance","Engineering & IT","Data & Analytics"],"correct":2,"concept":"Rule 4 taxonomy explicitly categorizes Security, IT, Software, and Infrastructure under 'Engineering & IT'.","useCase1":"Enterprise vendors segment cybersecurity buyers into technical IT evaluation tracks rather than administrative legal tracks.","useCase2":"Before: CISOs received facilities newsletters instead of SOC2 briefs. After: Accurate categorization lifted engagement 40%."},
+  {"id":8,"cat":"Foundations / Rules","q":"A lead submits company 'Siemens AG' and email 'klaus.meyer@siemens.de'. What is the value of is_business_email?","options":["false, because it is a country-code domain","false, because AG is an international suffix","null, pending MX record validation","true, because siemens.de is a verified corporate domain"],"correct":3,"concept":"Under Rule 3, any email domain that is not on consumer free provider lists (gmail, yahoo, etc.) qualifies as a business email (true).","useCase1":"B2B webinar gates immediately grant high MQL scores to corporate domains while challenging consumer emails.","useCase2":"Before: European country-code corporate domains were misclassified as consumer emails. After: Clean domain detection restored scoring."},
+  {"id":9,"cat":"Foundations / Rules","q":"Which job level strictly applies to 'Principal Solutions Architect'?","options":["Manager/Lead","Director","Individual Contributor","C-Suite/Founder"],"correct":0,"concept":"Rule 4 explicitly groups 'Principal' under 'Manager/Lead' alongside Manager, Team Lead, and Supervisor.","useCase1":"Presales teams assign senior technical consulting resources when meeting with customer Leads and Principals.","useCase2":"Before: Principals were demoted to junior developer queues, delaying architecture reviews. After: Mapped to Manager/Lead tier."},
+  {"id":10,"cat":"Foundations / Rules","q":"Under Rule 2, how should a German entity named 'Delivery Hero Germany GmbH' be normalized in company_clean?","options":["Delivery Hero Germany GmbH","Delivery Hero Germany","Delivery Hero","Delivery Hero, LLC"],"correct":1,"concept":"Rule 2 strips statutory entity suffixes (GmbH, AG, Inc, LLC) while preserving operating subsidiary names.","useCase1":"ERP and CRM billing engines consolidate regional subsidiaries under normalized operating brand names.","useCase2":"Before: 'GmbH' and 'Ltd' created duplicate account records for the same client. After: Suffix stripping matched accounts cleanly."},
+  {"id":11,"cat":"Arithmetic / Logic","q":"A contact has full identity, valid corporate email, clean title, but missing state in a non-US submission. If completeness is 90%, what data_quality_score is appropriate?","options":["45","60","90","10"],"correct":2,"concept":"Rule 6 scores data quality from 0 to 100 based on completeness of identity, business email, and role clarity. Non-mandatory nulls do not zero the score.","useCase1":"Lead grading algorithms filter out contacts scoring below 50 from auto-syncing into sales cadences.","useCase2":"Before: Blank state codes gave scores of 0, blocking valid European leads. After: Weighted scoring maintained 90 for clean records."},
+  {"id":12,"cat":"Arithmetic / Logic","q":"A submission contains email 'test@yahoo.com', title 'Consultant', and no company name. What should flagged_issues contain?","options":["[]","['invalid_syntax']","['unverified_user']","['free_email_used', 'missing_company']"],"correct":3,"concept":"Rule 6 requires an array of strings explicitly detailing data defects (free_email_used, missing_company). Clean records receive an empty array [].","useCase1":"Inbound enrichment webhooks trigger asynchronous Apollo/ZoomInfo secondary lookups only when flagged_issues contains specific defects.","useCase2":"Before: Defective records silently entered reps' queues. After: Clear issue flags allowed SDRs to triage unverified data."},
+  {"id":13,"cat":"Arithmetic / Logic","q":"In a 40-question Contact Washing Machine quiz, what is the exact required key distribution to satisfy QA Gate Rule 3?","options":["Exactly 10 A's, 10 B's, 10 C's, 10 D's","Any distribution as long as no letter exceeds 15","12 A's, 8 B's, 10 C's, 10 D's","Random distribution generated by Math.random()"],"correct":0,"concept":"The specification mandates strict choice balance: exactly 10 correct answers for each option (A, B, C, D) to prevent algorithmic bias during training.","useCase1":"Prevents participants from gaming workshop trivia by guessing predictable answer patterns like 'always pick C'.","useCase2":"Before: An unbalanced quiz had 60% B answers, skewing leaderboard analytics. After: Strict parity guaranteed fair assessment."},
+  {"id":14,"cat":"Arithmetic / Logic","q":"In the Standings Matrix, if 8 out of 20 participants submit the correct answer for Q14, what are Pass Rate % and Toughness %?","options":["Pass Rate: 60%, Toughness: 40%","Pass Rate: 40%, Toughness: 60%","Pass Rate: 20%, Toughness: 80%","Pass Rate: 50%, Toughness: 50%"],"correct":1,"concept":"Pass Rate % = (Correct / Total) * 100 = (8/20)*100 = 40%. Toughness % = 100% - Pass Rate% = 60%.","useCase1":"Workshop instructors inspect the Difficulty Radar to pinpoint topics with >50% Toughness for real-time live review.","useCase2":"Before: Instructors rushed past difficult regex questions unaware of confusion. After: Live toughness metrics triggered timely recaps."},
+  {"id":15,"cat":"Arithmetic / Logic","q":"A lead score model awards +10 points per correct cleanse rule. If a participant scores 320 points out of 40 questions, what is their Accuracy %?","options":["70%","75%","80%","85%"],"correct":2,"concept":"Total possible points = 40 * 10 = 400. 320 points represents 32 correct answers. Accuracy % = (32 / 40) * 100 = 80%.","useCase1":"Benchmarking consultant trainee cohorts against an 80% certification threshold for production CRM access.","useCase2":"Before: Trainees were deployed without quantified readiness scores. After: An 80% accuracy gate slashed client data errors by 65%."},
+  {"id":16,"cat":"Arithmetic / Logic","q":"A participant chooses Option A (index 0). Why does the architecture mandate strict check 'userAnswer !== undefined && userAnswer !== null'?","options":["Because Option A is worth double points","Because index 0 evaluates as true in JavaScript","To prevent PeerJS latency bugs","Because index 0 is falsy in JavaScript, so 'if (userAnswer)' would falsely treat Option A as unselected"],"correct":3,"concept":"In JavaScript, index 0 is falsy. A loose truthiness check like 'if (!userAnswer)' evaluates 0 as false, locking out Option A submissions as unanswered.","useCase1":"Critical state coordination bug prevention in multiplayer event polling and real-time state broadcast.","useCase2":"Before: Contestants picking Option A had answers dropped due to falsy evaluation. After: Strict null checks restored 100% answer capture."},
+  {"id":17,"cat":"Arithmetic / Logic","q":"A raw phone field is '+1 (415) 555-0199 ext 102'. If normalized to E.164, what is the output?","options":["+14155550199","01114155550199","(415) 555-0199","4155550199102"],"correct":0,"concept":"E.164 format strictly requires the plus sign followed by country code and subscriber number without punctuation, whitespace, or extensions.","useCase1":"Twilio and sales dialer CTI integrations fail or drop calls when numbers contain parentheses, dashes, or extension strings.","useCase2":"Before: Manual reps wasted 2 hours daily fixing malformed phone numbers. After: Automated E.164 parsing enabled 1-click click-to-dial."},
+  {"id":18,"cat":"Arithmetic / Logic","q":"A lead provides first_name 'J.' and last_name 'Smith', but title 'CEO', valid domain 'stripe.com'. What is the data_quality_score impact?","options":["Score must be 0 because first name is an initial","Slight deduction (~80-85) because identity has minor truncation but corporate domain and C-level title are verified","Score must be 100 with no deductions","Flagged as fraudulent and blocked"],"correct":1,"concept":"Rule 6 balances identity completeness against verified corporate authority. A single-letter initial warrants a minor deduction but does not invalidate an executive lead.","useCase1":"VIP lead fast-tracking allows high-value executive submissions to bypass automated bot rejections.","useCase2":"Before: C-suite executives entering 'J. Smith' were rejected by validation forms. After: Weighted scoring preserved high-value pipeline."},
+  {"id":19,"cat":"Arithmetic / Logic","q":"If countdown timer is configured to 40 seconds, at what remaining seconds will the UI transition to Warning Amber (35%) and Danger Red (15%)?","options":["Amber at 20s, Red at 10s","Amber at 15s, Red at 5s","Amber at 14s, Red at 6s","Amber at 25s, Red at 8s"],"correct":2,"concept":"40s * 35% = 14s (Warning Amber). 40s * 15% = 6s (Danger Red). The UI calculates dynamic thresholds based on host-selected duration.","useCase1":"Visual pacing cues help participants manage time without distracting auditory alarms during live workshops.","useCase2":"Before: Static 5-second alarms panicked participants on 60-second questions. After: Proportional color shifts smoothed pacing."},
+  {"id":20,"cat":"Arithmetic / Logic","q":"Under Rule 1, if only full_name 'Jean-Luc Picard' is provided, what are the clean outputs?","options":["first_name: 'Jean', last_name: 'Luc Picard'","first_name: 'Jean Luc', last_name: 'Picard'","first_name: 'Jean-Luc Picard', last_name: ''","first_name: 'Jean-Luc', last_name: 'Picard'"],"correct":3,"concept":"Hyphenated given names must be preserved as single composite first names rather than split across whitespace delimiters.","useCase1":"Cultural name normalization ensures respectful and accurate personalization across European and multicultural customer bases.","useCase2":"Before: Splitting at the hyphen resulted in greeting French executives as 'Hi Jean-'. After: Hyphen preservation delivered flawless outreach."},
+  {"id":21,"cat":"Scenarios & Routing","q":"A form submission arrives with title 'Founder & Managing Partner'. How should job_level and job_function be classified?","options":["job_level: 'C-Suite/Founder', job_function: 'General Management'","job_level: 'VP', job_function: 'Sales'","job_level: 'Director', job_function: 'Finance'","job_level: 'Manager/Lead', job_function: 'Other/Unknown'"],"correct":0,"concept":"Rule 4 explicitly lists 'Founder', 'Owner', and 'Managing Partner' under 'C-Suite/Founder'. Operational founders map to 'General Management'.","useCase1":"Venture capital and B2B SaaS routing rules prioritize C-Suite/Founders for immediate partner-level discovery calls.","useCase2":"Before: 'Managing Partner' defaulted to 'Manager/Lead', routing law firm partners to mid-market SDRs. After: C-Suite classification unlocked senior routing."},
+  {"id":22,"cat":"Scenarios & Routing","q":"A raw submission arrives with company 'Apple Inc.' and website 'APPLE.COM/IPHONE'. How should domain_clean be stored?","options":["apple.com/iphone","apple.com","www.apple.com","https://apple.com"],"correct":1,"concept":"Rule 2 requires root domain extraction in lowercase, stripping protocols, subpaths, and port numbers.","useCase1":"Account hierarchies in CRM index accounts by lowercase root domain to guarantee instantaneous index lookups.","useCase2":"Before: Uppercase domains caused duplicate key collisions in PostgreSQL. After: Lowercase root domain extraction ensured 100% deduplication."},
+  {"id":23,"cat":"Scenarios & Routing","q":"A lead submits title 'SDR Team Lead'. Under Rule 4, what are standardized_title, job_level, and job_function?","options":["standardized_title: 'SDR Team Lead', job_level: 'Individual Contributor', job_function: 'Marketing'","standardized_title: 'Sales Development Representative', job_level: 'VP', job_function: 'Sales'","standardized_title: 'Sales Development Representative Team Lead', job_level: 'Manager/Lead', job_function: 'Sales'","standardized_title: 'Team Lead', job_level: 'Director', job_function: 'RevOps'"],"correct":2,"concept":"SDR expands to 'Sales Development Representative', Team Lead maps to 'Manager/Lead', and SDR/BDR roles belong to 'Sales'.","useCase1":"Sales management software categorizes team leads into frontline manager cohorts for sales coaching programs.","useCase2":"Before: SDR leads were lumped with entry-level reps, excluding frontline managers from leadership summits. After: Manager/Lead taxonomy fixed alignment."},
+  {"id":24,"cat":"Scenarios & Routing","q":"A contact enters email 'jane.doe@outlook.com' and company 'Self-Employed Consultant'. What are is_business_email and flagged_issues?","options":["is_business_email: true, flagged_issues: []","is_business_email: false, flagged_issues: []","is_business_email: true, flagged_issues: ['unverified_domain']","is_business_email: false, flagged_issues: ['free_email_used']"],"correct":3,"concept":"Outlook.com is an explicit consumer domain under Rule 3. Hence is_business_email is false, and flagged_issues must contain 'free_email_used'.","useCase1":"Self-service SaaS products trigger credit card verification or email verification steps before starting high-tier trials.","useCase2":"Before: Free email signups abused enterprise sandbox environments. After: Automated flagging quarantined consumer emails for manual verification."},
+  {"id":25,"cat":"Scenarios & Routing","q":"A lead registers as 'VP of People & Culture'. What is the correct job_level and job_function?","options":["job_level: 'VP', job_function: 'HR & Talent'","job_level: 'Director', job_function: 'General Management'","job_level: 'C-Suite/Founder', job_function: 'HR & Talent'","job_level: 'VP', job_function: 'Customer Success'"],"correct":0,"concept":"'People & Culture' is modern enterprise terminology for Human Resources, strictly mapping to 'HR & Talent'. Job level is 'VP'.","useCase1":"HR technology platforms route People leaders to employee engagement product demos rather than recruitment agency queues.","useCase2":"Before: 'People & Culture' mapped to 'Other/Unknown', dropping lead scoring. After: Correct HR & Talent mapping doubled demo conversions."},
+  {"id":26,"cat":"Scenarios & Routing","q":"A form contains city 'Bengaluru', state 'Karnataka', country 'India'. What are country_code and state_code?","options":["country_code: 'IND', state_code: 'KA'","country_code: 'IN', state_code: 'KA'","country_code: 'IN', state_code: null","country_code: 'India', state_code: 'Karnataka'"],"correct":1,"concept":"Rule 5 requires 2-letter ISO country code ('IN'). Where standard 2-letter state codes apply (Karnataka = 'KA'), use the 2-letter code.","useCase1":"Tax calculation engines and regional compliance engines (e.g. GST in India) require ISO country and state codes for e-invoicing.","useCase2":"Before: Writing 'Bengaluru, India' without ISO codes caused automated billing failures in Stripe. After: Clean codes automated tax calculations."},
+  {"id":27,"cat":"Scenarios & Routing","q":"A lead provides title 'Legal Counsel & Data Protection Officer'. How should job_level and job_function be categorized?","options":["job_level: 'C-Suite/Founder', job_function: 'Engineering & IT'","job_level: 'Director', job_function: 'General Management'","job_level: 'Individual Contributor', job_function: 'Legal & Compliance'","job_level: 'Manager/Lead', job_function: 'Finance'"],"correct":2,"concept":"'Counsel' maps to Individual Contributor. DPO and Legal Counsel roles belong to 'Legal & Compliance'.","useCase1":"Privacy software platforms (e.g. OneTrust) target DPOs with GDPR/CCPA regulatory content.","useCase2":"Before: DPOs were misclassified as IT Security, receiving network appliance brochures. After: Legal & Compliance alignment lifted response rates 3x."},
+  {"id":28,"cat":"Scenarios & Routing","q":"A lead enters company 'McKinsey & Company, Inc.'. How should company_clean be standardized?","options":["McKinsey","McKinsey & Company, Inc.","McKinsey & Co","McKinsey & Company"],"correct":3,"concept":"Strip legal entity ', Inc.' while preserving the proper registered corporate name 'McKinsey & Company'.","useCase1":"Ensures high-prestige client references are rendered cleanly in executive sales proposals without awkward legal suffixes.","useCase2":"Before: Stripping 'Company' turned McKinsey into just 'McKinsey &', creating broken display headers. After: Targeted legal suffix stripping preserved the name."},
+  {"id":29,"cat":"Scenarios & Routing","q":"A lead registers as 'Co-Founder & Chief Product Officer'. What are job_level and job_function?","options":["job_level: 'C-Suite/Founder', job_function: 'Product'","job_level: 'VP', job_function: 'Product'","job_level: 'C-Suite/Founder', job_function: 'Engineering & IT'","job_level: 'Director', job_function: 'General Management'"],"correct":0,"concept":"Chief Product Officer / Co-Founder sits at the C-Suite level, and the departmental discipline is strictly 'Product'.","useCase1":"Product-led growth (PLG) analytics tools tailor messaging specifically to CPOs regarding feature adoption and onboarding friction.","useCase2":"Before: CPOs received engineering backend database pitches. After: Accurate Product taxonomy sent roadmap analytics content, driving trial signups."},
+  {"id":30,"cat":"Scenarios & Routing","q":"A submission contains title 'Growth Marketing Specialist'. How is it classified under Rule 4?","options":["job_level: 'Manager/Lead', job_function: 'Sales'","job_level: 'Individual Contributor', job_function: 'Marketing'","job_level: 'Entry/Intern', job_function: 'Marketing'","job_level: 'Individual Contributor', job_function: 'RevOps'"],"correct":1,"concept":"'Specialist' explicitly maps to 'Individual Contributor', and 'Growth Marketing' maps to 'Marketing'.","useCase1":"Marketing conference organizers segment session invitations between tactical hands-on practitioners vs strategic VP keynotes.","useCase2":"Before: Specialists were invited to executive roundtables, leading to awkward session dynamics. After: Role-level segmentation tailored attendee tracks."},
+  {"id":31,"cat":"Advanced Edge Cases","q":"A submission contains website 'http://subdomain.corp.amazon.co.uk:8080/careers?ref=123'. What is the exact domain_clean?","options":["subdomain.corp.amazon.co.uk","amazon.co.uk:8080","amazon.co.uk","amazon.com"],"correct":2,"concept":"Must strip protocol, port (:8080), subpaths, query strings, and subdomains, resolving to the public root domain 'amazon.co.uk'.","useCase1":"Public Suffix List (PSL) parsing prevents subdomains or internal intranet ports from contaminating corporate master domains.","useCase2":"Before: Internal port numbers broke website link preview cards in CRM. After: PSL root domain parsing guaranteed clean account URLs."},
+  {"id":32,"cat":"Advanced Edge Cases","q":"A lead provides name 'van der Bilt', 'LUDWIG'. What are the cleaned first_name and last_name?","options":["first_name: 'Ludwig', last_name: 'Vanderbilt'","first_name: 'LUDWIG', last_name: 'van der bilt'","first_name: 'Ludwig', last_name: 'Van Der Bilt'","first_name: 'Ludwig', last_name: 'van der Bilt'"],"correct":3,"concept":"Dutch surname prefixes (tussenvoegsels like 'van der') retain lowercase formatting while the main surname root is capitalized.","useCase1":"Executive white-glove communication in Benelux enterprise accounts demands cultural accuracy in salutations.","useCase2":"Before: Naive title-casing produced 'Van Der Bilt', irritating Dutch prospects. After: Tussenvoegsel-aware casing elevated brand prestige."},
+  {"id":33,"cat":"Advanced Edge Cases","q":"A contact enters title 'Acting Interim VP of Global Sales Ops'. What are standardized_title, job_level, and job_function?","options":["standardized_title: 'Vice President of Global Sales Operations', job_level: 'VP', job_function: 'RevOps'","standardized_title: 'Acting Interim VP of Sales Ops', job_level: 'Manager/Lead', job_function: 'Sales'","standardized_title: 'Vice President of Sales', job_level: 'Director', job_function: 'Sales'","standardized_title: 'VP of Sales Operations', job_level: 'VP', job_function: 'General Management'"],"correct":0,"concept":"Expand abbreviations ('VP' -> 'Vice President', 'Sales Ops' -> 'Sales Operations'). Seniority remains 'VP' and Sales Operations falls under 'RevOps'.","useCase1":"Interim executive placements hold active signing authority and must be treated with VP-level SLA prioritization.","useCase2":"Before: Stripping 'Interim' confused reps on prospect tenure. After: Proper standardization retained authority while clarifying RevOps scope."},
+  {"id":34,"cat":"Advanced Edge Cases","q":"A submission has email 'alex@protonmail.com' and company 'Stealth Startup'. What should is_business_email and flagged_issues be?","options":["is_business_email: true, flagged_issues: []","is_business_email: false, flagged_issues: ['free_email_used']","is_business_email: false, flagged_issues: ['encrypted_provider_blocked']","is_business_email: true, flagged_issues: ['stealth_company']"],"correct":1,"concept":"ProtonMail, iCloud, and Tutanota are consumer/personal encrypted mail providers. Under Rule 3, is_business_email is false and flagged_issues records 'free_email_used'.","useCase1":"Security compliance gates require enterprise B2B customers to register with verifiable corporate domain addresses.","useCase2":"Before: Unregulated personal accounts signed up for sensitive sandbox instances. After: Flagging quarantined non-corporate emails for KYC checks."},
+  {"id":35,"cat":"Advanced Edge Cases","q":"A lead provides company 'Sony Corporation of America, LLC'. How should company_clean be formatted?","options":["Sony","Sony Corporation of America, LLC","Sony Corporation of America","Sony Corp"],"correct":2,"concept":"Strip terminal legal entity ', LLC' while retaining the full corporate regional subsidiary designation 'Sony Corporation of America'.","useCase1":"Global parent-child account mapping in Salesforce requires distinguishing US subsidiaries from Japanese parent corporations.","useCase2":"Before: Over-aggressive stripping collapsed all regional entities into 'Sony', breaking territory account splits. After: Clean subsidiary preservation."},
+  {"id":36,"cat":"Advanced Edge Cases","q":"A form contains title 'Graduate Summer Intern - FinOps'. What are job_level and job_function?","options":["job_level: 'Individual Contributor', job_function: 'RevOps'","job_level: 'Manager/Lead', job_function: 'Finance'","job_level: 'Other/Unknown', job_function: 'General Management'","job_level: 'Entry/Intern', job_function: 'Finance'"],"correct":3,"concept":"Rule 4 explicitly maps Intern, Trainee, and Assistant to 'Entry/Intern'. FinOps (Financial Operations) maps to 'Finance'.","useCase1":"Prevents junior interns from being routed into high-value sales discovery calls, saving rep time.","useCase2":"Before: 'FinOps' was matched to high-priority RevOps queues, wasting senior AE hours on unpaid summer interns. After: Entry/Intern filter resolved routing."},
+  {"id":37,"cat":"Advanced Edge Cases","q":"A lead has empty title '', company 'Acme', email 'tim@acme.com'. What should job_level, job_function, and flagged_issues be?","options":["job_level: 'Other/Unknown', job_function: 'Other/Unknown', flagged_issues: ['unclear_title']","job_level: 'Individual Contributor', job_function: 'General Management', flagged_issues: []","job_level: 'Entry/Intern', job_function: 'Other/Unknown', flagged_issues: ['missing_title']","job_level: null, job_function: null, flagged_issues: []"],"correct":0,"concept":"Rule 4 states missing or unclear titles map to 'Other/Unknown'. Rule 6 requires flagging the defect as 'unclear_title'.","useCase1":"Triggers automated title enrichment workflows (e.g. LinkedIn Sales Navigator scraping) only when titles are tagged 'Other/Unknown'.","useCase2":"Before: Missing titles broke downstream SQL reporting scripts with null pointer exceptions. After: Safe 'Other/Unknown' defaults protected data pipelines."},
+  {"id":38,"cat":"Advanced Edge Cases","q":"A submission contains country 'Hong Kong' and city 'Hong Kong'. What should country_code be under ISO-3166-1 alpha-2?","options":["CN","HK","HKG","null"],"correct":1,"concept":"Under ISO-3166-1 alpha-2, Hong Kong has its own dedicated 2-letter territory code 'HK'.","useCase1":"Compliance with regional telecommunications, cross-border privacy, and postal dispatch systems in East Asia.","useCase2":"Before: Forcing 'CN' caused marketing SMS campaigns to fail due to mismatched country dialing prefixes (+852 vs +86). After: 'HK' resolved telecom delivery."},
+  {"id":39,"cat":"Advanced Edge Cases","q":"A lead enters name 'MARY-JANE WATSON', email 'mj.watson@dailybugle.co.uk'. What is the clean first_name and last_name?","options":["first_name: 'Mary Jane', last_name: 'Watson'","first_name: 'Mary-jane', last_name: 'Watson'","first_name: 'Mary-Jane', last_name: 'Watson'","first_name: 'MARY', last_name: 'WATSON'"],"correct":2,"concept":"Hyphenated compound names require both capitalized elements ('Mary-Jane') to respect proper grammatical casing.","useCase1":"VIP guest list badges and personalized lanyards at annual customer conferences.","useCase2":"Before: Printing 'Mary-jane' on badges looked unprofessional at flagship conferences. After: Title casing across hyphens ensured executive-grade polish."},
+  {"id":40,"cat":"Advanced Edge Cases","q":"Why does the Contact Washing Machine pre-flight QA gate verify gold keys against REVIEWED_KEYS before session launch?","options":["To reduce WebRTC bandwidth consumption","To ensure questions contain random difficulty levels","To automatically award points to all connected participants","To prevent runtime answer key mismatches and ensure zero-defect live workshop delivery"],"correct":3,"concept":"Pre-flight content integrity gates verify data consistency, question count, and answer key parity prior to live client delivery, preventing costly training errors.","useCase1":"Mission-critical enterprise training workshops where discrepancies in scoring erode consultant authority and client trust.","useCase2":"Before: A typo in an answer key sparked contentious arguments during an executive seminar. After: Pre-flight gates guaranteed flawless session execution."}
+];
+
+const REVIEWED_KEYS = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
+
+let currentRole = null;
+let myName = '';
+let currentRoom = '';
+let peer = null;
+let hostConn = null;
+let participantConns = {};
+let participants = {};
+let activeQIndex = 0;
+let timerDuration = 30;
+let timerLeft = 30;
+let timerInterval = null;
+let timerPaused = false;
+let mySelectedAnswer = null;
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('cwm_theme', theme);
+}
+const savedTheme = localStorage.getItem('cwm_theme') || 'light';
+document.getElementById('themeSelect').value = savedTheme;
+applyTheme(savedTheme);
+
+function goToScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen3') initHost();
+}
+
+function runQuizPreflight() {
+  const statusEl = document.getElementById('preflightStatus');
+  const startBtn = document.getElementById('startWorkshopBtn');
+  let errors = [];
+
+  if (QUESTIONS.length !== 40) errors.push(`Expected 40 questions, found ${QUESTIONS.length}`);
+  
+  let keyCounts = [0, 0, 0, 0];
+  QUESTIONS.forEach((q, idx) => {
+    if (!q.options || q.options.length !== 4) errors.push(`Q${idx+1}: must have exactly 4 choices`);
+    if (q.correct < 0 || q.correct > 3) errors.push(`Q${idx+1}: invalid correct key`);
+    else keyCounts[q.correct]++;
+    if (!q.concept || !q.useCase1 || !q.useCase2) errors.push(`Q${idx+1}: missing 3-part rationale`);
+    if (REVIEWED_KEYS[idx] !== q.correct) errors.push(`Q${idx+1}: mismatch with canonical key`);
+  });
+
+  if (keyCounts[0] !== 10 || keyCounts[1] !== 10 || keyCounts[2] !== 10 || keyCounts[3] !== 10) {
+    errors.push(`Strict key balance failed: [A:${keyCounts[0]}, B:${keyCounts[1]}, C:${keyCounts[2]}, D:${keyCounts[3]}]`);
+  }
+
+  if (errors.length === 0) {
+    statusEl.style.background = 'rgba(22,163,74,0.12)';
+    statusEl.style.border = '1px solid var(--success)';
+    statusEl.style.color = 'var(--success)';
+    statusEl.innerHTML = '✅ <strong>Pre-Flight Verification Passed:</strong> 40 questions loaded with verified 10/10/10/10 choice balance and gold key match.';
+    startBtn.disabled = false;
+  } else {
+    statusEl.style.background = 'rgba(220,38,38,0.12)';
+    statusEl.style.border = '1px solid var(--danger)';
+    statusEl.style.color = 'var(--danger)';
+    statusEl.innerHTML = '❌ <strong>Pre-Flight QA Gate Failed:</strong><br>' + errors.join('<br>');
+    startBtn.disabled = true;
+  }
+}
+
+function initHost() {
+  currentRole = 'host';
+  myName = 'Host';
+  runQuizPreflight();
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  currentRoom = code;
+  document.getElementById('hostRoomCode').innerText = code;
+  document.getElementById('hostToolbar').style.display = 'flex';
+
+  peer = new Peer('workshop-quiz-' + code);
+  peer.on('open', () => console.log('Host active:', code));
+  peer.on('connection', conn => {
+    conn.on('data', data => handleHostMessage(conn, data));
+    conn.on('close', () => {
+      delete participantConns[conn.peer];
+      updateOnlineCount();
+    });
+  });
+}
+
+function handleHostMessage(conn, data) {
+  if (data.type === 'join') {
+    participantConns[conn.peer] = conn;
+    if (!participants[data.name]) {
+      participants[data.name] = { score: 0, answers: {} };
+    }
+    conn.send({
+      type: 'sync',
+      qIndex: activeQIndex,
+      duration: timerDuration,
+      left: timerLeft,
+      paused: timerPaused,
+      participants: participants
+    });
+    updateOnlineCount();
+    renderMatrix();
+  } else if (data.type === 'answer') {
+    if (participants[data.name]) {
+      participants[data.name].answers[data.qIndex] = data.answer;
+      if (data.answer === QUESTIONS[data.qIndex].correct) {
+        participants[data.name].score += 10;
+      }
+    }
+    broadcastState();
+    renderMatrix();
+  }
+}
+
+function updateOnlineCount() {
+  const count = Object.keys(participantConns).length;
+  document.getElementById('onlineCounter').innerText = `👥 Online: ${count + (currentRole === 'host' ? 1 : 0)}`;
+  const hCount = document.getElementById('hostParticipantCount');
+  if (hCount) hCount.innerText = count;
+}
+
+function broadcastState() {
+  const payload = {
+    type: 'state',
+    qIndex: activeQIndex,
+    duration: timerDuration,
+    left: timerLeft,
+    paused: timerPaused,
+    participants: participants
+  };
+  Object.values(participantConns).forEach(c => c.send(payload));
+}
+
+function joinRoom() {
+  const name = document.getElementById('pName').value.trim();
+  const code = document.getElementById('pRoom').value.trim();
+  if (!name || code.length !== 4) return alert('Enter valid name and 4-digit room code');
+
+  currentRole = 'participant';
+  myName = name;
+  currentRoom = code;
+  peer = new Peer();
+  peer.on('open', () => {
+    hostConn = peer.connect('workshop-quiz-' + code);
+    hostConn.on('open', () => {
+      hostConn.send({ type: 'join', name: myName });
+      goToScreen('screen4');
+      setupJumpSelect();
+    });
+    hostConn.on('data', data => handleParticipantMessage(data));
+  });
+}
+
+function handleParticipantMessage(data) {
+  if (data.type === 'sync' || data.type === 'state') {
+    activeQIndex = data.qIndex;
+    timerDuration = data.duration;
+    timerLeft = data.left;
+    participants = data.participants;
+    renderQuestion();
+    renderMatrix();
+  } else if (data.type === 'reveal') {
+    showExplanation();
+  } else if (data.type === 'finish') {
+    renderPodium();
+    goToScreen('screen5');
+  }
+}
+
+function startWorkshop() {
+  goToScreen('screen4');
+  setupJumpSelect();
+  startTimer();
+  renderQuestion();
+  renderMatrix();
+}
+
+function setupJumpSelect() {
+  const sel = document.getElementById('jumpSelect');
+  sel.innerHTML = '';
+  QUESTIONS.forEach((q, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.innerText = `Q${idx+1}: ${q.cat}`;
+    sel.appendChild(opt);
+  });
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[activeQIndex];
+  document.getElementById('catBadge').innerText = q.cat;
+  document.getElementById('qCounter').innerText = `Question ${activeQIndex + 1} of 40`;
+  document.getElementById('questionPrompt').innerText = q.q;
+  document.getElementById('jumpSelect').value = activeQIndex;
+  document.getElementById('insightCard').style.display = 'none';
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  mySelectedAnswer = participants[myName]?.answers[activeQIndex] ?? null;
+
+  q.options.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn' + (mySelectedAnswer === idx ? ' selected' : '');
+    btn.innerText = `${String.fromCharCode(65 + idx)}. ${optText}`;
+    btn.onclick = () => selectAnswer(idx);
+    grid.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (timerLeft <= 0) return;
+  mySelectedAnswer = idx;
+  if (currentRole === 'participant' && hostConn) {
+    hostConn.send({ type: 'answer', name: myName, qIndex: activeQIndex, answer: idx });
+  } else if (currentRole === 'host') {
+    if (!participants[myName]) participants[myName] = { score: 0, answers: {} };
+    participants[myName].answers[activeQIndex] = idx;
+    if (idx === QUESTIONS[activeQIndex].correct) participants[myName].score += 10;
+    broadcastState();
+  }
+  renderQuestion();
+  renderMatrix();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerLeft = timerDuration;
+  timerInterval = setInterval(() => {
+    if (!timerPaused) {
+      timerLeft--;
+      updateTimerUI();
+      if (timerLeft <= 0) {
+        clearInterval(timerInterval);
+        revealAnswer();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  document.getElementById('timerDisplay').innerText = `${timerLeft}s`;
+  const pct = (timerLeft / timerDuration) * 100;
+  const bar = document.getElementById('progressFill');
+  bar.style.width = pct + '%';
+  if (pct <= 15) bar.style.background = 'var(--danger)';
+  else if (pct <= 35) bar.style.background = 'var(--warning)';
+  else bar.style.background = 'var(--primary)';
+}
+
+function toggleTimer() {
+  timerPaused = !timerPaused;
+  document.getElementById('timerToggleBtn').innerText = timerPaused ? 'Resume' : 'Pause';
+  broadcastState();
+}
+
+function resetTimer() {
+  timerLeft = timerDuration;
+  updateTimerUI();
+  broadcastState();
+}
+
+function navQuestion(dir) {
+  const next = activeQIndex + dir;
+  if (next >= 0 && next < 40) {
+    activeQIndex = next;
+    startTimer();
+    renderQuestion();
+    broadcastState();
+    renderMatrix();
+  }
+}
+
+function jumpToQ(idx) {
+  activeQIndex = idx;
+  startTimer();
+  renderQuestion();
+  broadcastState();
+  renderMatrix();
+}
+
+function revealAnswer() {
+  showExplanation();
+  if (currentRole === 'host') {
+    Object.values(participantConns).forEach(c => c.send({ type: 'reveal' }));
+  }
+}
+
+function showExplanation() {
+  const q = QUESTIONS[activeQIndex];
+  document.getElementById('insightCard').style.display = 'block';
+  document.getElementById('insightConcept').innerText = q.concept;
+  document.getElementById('insightUC1').innerText = q.useCase1;
+  document.getElementById('insightUC2').innerText = q.useCase2;
+
+  const btns = document.querySelectorAll('#optionsGrid .opt-btn');
+  btns.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === q.correct) btn.classList.add('correct');
+    else if (idx === mySelectedAnswer) btn.classList.add('wrong');
+  });
+}
+
+function finishWorkshop() {
+  renderPodium();
+  goToScreen('screen5');
+  if (currentRole === 'host') {
+    Object.values(participantConns).forEach(c => c.send({ type: 'finish' }));
+  }
+}
+
+function renderMatrix() {
+  const head = document.getElementById('matrixHead');
+  const body = document.getElementById('matrixBody');
+  const foot = document.getElementById('matrixFoot');
+
+  head.innerHTML = '<th class="sticky-col-1">Rank</th><th class="sticky-col-2">Participant</th><th>Total Pts</th><th>Acc %</th>';
+  for (let i = 0; i < 40; i++) {
+    head.innerHTML += `<th id="col-q-${i}">Q${i+1}</th>`;
+  }
+
+  const pList = Object.entries(participants).map(([name, data]) => ({
+    name,
+    score: data.score || 0,
+    answers: data.answers || {}
+  })).sort((a,b) => b.score - a.score);
+
+  body.innerHTML = '';
+  pList.forEach((p, rIdx) => {
+    const acc = Math.round((p.score / (40 * 10)) * 100);
+    let row = `<tr>
+      <td class="sticky-col-1">#${rIdx+1}</td>
+      <td class="sticky-col-2"><strong>${p.name}</strong></td>
+      <td>${p.score}</td>
+      <td>${acc}%</td>`;
+    for (let i = 0; i < 40; i++) {
+      const ans = p.answers[i];
+      if (ans !== undefined && ans !== null) {
+        if (ans === QUESTIONS[i].correct) row += `<td><span style="color:var(--success);">✅</span></td>`;
+        else row += `<td><span style="color:var(--danger);">❌</span></td>`;
+      } else {
+        row += `<td><span style="color:var(--text-muted);">⚪</span></td>`;
+      }
+    }
+    row += '</tr>';
+    body.innerHTML += row;
+  });
+
+  let footPass = '<tr><td colspan="4" style="text-align:right;"><strong>Pass Rate %</strong></td>';
+  let footTough = '<tr><td colspan="4" style="text-align:right;"><strong>Toughness %</strong></td>';
+  let diffStats = [];
+
+  for (let i = 0; i < 40; i++) {
+    let corr = 0;
+    let total = pList.length || 1;
+    pList.forEach(p => { if (p.answers[i] === QUESTIONS[i].correct) corr++; });
+    const passRate = Math.round((corr / total) * 100);
+    const tough = 100 - passRate;
+    diffStats.push({ q: i + 1, pass: passRate, tough: tough });
+    footPass += `<td>${passRate}%</td>`;
+    footTough += `<td>${tough}%</td>`;
+  }
+  foot.innerHTML = footPass + '</tr>' + footTough + '</tr>';
+
+  diffStats.sort((a,b) => b.tough - a.tough);
+  const toughest = diffStats.slice(0, 3).map(s => `Q${s.q}: ${s.tough}% Toughness`).join('<br>');
+  const easiest = diffStats.slice(-3).reverse().map(s => `Q${s.q}: ${s.pass}% Pass Rate`).join('<br>');
+  document.getElementById('toughestList').innerHTML = toughest || 'No data yet';
+  document.getElementById('easiestList').innerHTML = easiest || 'No data yet';
+}
+
+function focusCurrentCol() {
+  const el = document.getElementById(`col-q-${activeQIndex}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+}
+
+function renderPodium() {
+  const pList = Object.entries(participants).map(([name, data]) => ({
+    name, score: data.score
+  })).sort((a,b) => b.score - a.score);
+
+  const container = document.getElementById('podiumDisplay');
+  container.innerHTML = '';
+  const heights = ['140px', '110px', '80px'];
+  const places = ['🥇 1st Place', '🥈 2nd Place', '🥉 3rd Place'];
+
+  for (let i = 0; i < 3; i++) {
+    const p = pList[i] || { name: '---', score: 0 };
+    const box = document.createElement('div');
+    box.style.cssText = `background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; width:120px; height:${heights[i]}; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;`;
+    box.innerHTML = `<div style="font-weight:700; font-size:12px;">${places[i]}</div><div style="font-size:14px; margin:4px 0;">${p.name}</div><div style="font-size:12px; color:var(--primary); font-weight:700;">${p.score} pts</div>`;
+    container.appendChild(box);
+  }
+}
+
+function exportScoresCSV() {
+  let rows = [['Rank', 'Participant', 'Total Points', 'Accuracy %']];
+  for (let i = 0; i < 40; i++) rows[0].push(`Q${i+1}_Result`);
+
+  const pList = Object.entries(participants).map(([name, data]) => ({
+    name, score: data.score || 0, answers: data.answers || {}
+  })).sort((a,b) => b.score - a.score);
+
+  pList.forEach((p, idx) => {
+    const acc = Math.round((p.score / 400) * 100);
+    const row = [idx + 1, p.name, p.score, `${acc}%`];
+    for (let i = 0; i < 40; i++) {
+      const a = p.answers[i];
+      if (a === undefined || a === null) row.push('Unanswered');
+      else if (a === QUESTIONS[i].correct) row.push('Correct');
+      else row.push('Incorrect');
+    }
+    rows.push(row);
+  });
+
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Contact_Washing_Machine_Scores_${currentRoom || 'Session'}.csv`;
+  a.click();
+}
+</script>
+</body>
+</html>
